@@ -84,29 +84,25 @@ modeling_clean <- modeling %>%
 empirical_continent <- empirical_clean%>%
   select(continent_clean) %>%
   group_by(continent_clean) %>%
-  summarize(continent_cases = n())
+  summarize(total_cases = n())
 
 modeling_continent <- modeling_clean %>%
   select(continent_clean) %>%
   group_by(continent_clean) %>%
-  summarize(continent_cases = n()) %>%
+  summarize(total_cases = n()) %>%
   mutate(continent_clean = ifelse(is.na(continent_clean), "Simulated studies", continent_clean))
-
-total_cases <- bind_rows(empirical_continent, modeling_continent) %>%
-  group_by(continent_clean) %>%
-  summarize(total_cases = sum(continent_cases))
-
-
 
 
 empirical_bar <- empirical_clean %>%
   select(continent_clean, short_type_of_closure_clean) %>%
-  group_by(continent_clean, short_type_of_closure_clean) %>%
-  summarize(continent_per_closure_type = n()) %>%
   mutate(short_type_of_closure_clean = ifelse(short_type_of_closure_clean == "Dynamic/Triggered Closure", "Dynamic/Triggered closure", short_type_of_closure_clean)) %>%
   group_by(continent_clean, short_type_of_closure_clean) %>%
-  summarize(continent_per_closure_type = sum(continent_per_closure_type)) %>%
-  mutate(source = "Empirical")
+  summarize(continent_per_closure_type = n()) %>%
+  mutate(source = "Empirical") %>%
+  left_join(empirical_continent, by = "continent_clean") %>%
+  # rearrange the columns
+  select(continent_clean, source, short_type_of_closure_clean, continent_per_closure_type, total_cases) %>%
+  mutate(continent_clean = factor(continent_clean, levels = c("Europe", "North America", "Oceania", "South America", "Africa", "Asia")))
 
 modeling_bar <- modeling_clean %>%
   select(continent_clean, objectives_scenarios_clean) %>%
@@ -114,17 +110,56 @@ modeling_bar <- modeling_clean %>%
   group_by(continent_clean, objectives_scenarios_clean) %>%
   summarize(continent_per_closure_type = n()) %>%
   mutate(source = "Modeling") %>%
-  rename(short_type_of_closure_clean = objectives_scenarios_clean)
-
-total_bar <- bind_rows(empirical_bar, modeling_bar) %>% 
-  left_join(total_cases, by = "continent_clean") %>%
+  rename(short_type_of_closure_clean = objectives_scenarios_clean) %>%
+  left_join(modeling_continent, by = "continent_clean") %>%
+  # rearrange the columns
   select(continent_clean, source, short_type_of_closure_clean, continent_per_closure_type, total_cases) %>%
+  mutate(continent_clean = factor(continent_clean, levels = c("Oceania", "North America", "Simulated studies", "Africa", "Europe")))
+
+  
+
+total_bar <- bind_rows(empirical_bar, modeling_bar) %>%
+  mutate(source = factor(source, levels = c("Empirical", "Modeling"))) %>%
   mutate(percentage = (continent_per_closure_type/total_cases)*100) %>%
   mutate(percentage = round(percentage, 0)) %>%
   mutate(label = paste0(percentage, "%")) %>%
-  mutate(label_closure_type = paste0("n=", total_cases))
+  mutate(label_closure_type = paste0("n=", total_cases)) %>%
+  mutate(short_type_of_closure_clean = factor(short_type_of_closure_clean, levels = c("Determinate closure", "Rotational closure", "Periodic closure", "Dynamic/Triggered closure")))
 
 
+#########################################################
+# Make figure below
+
+# import theme
+
+base_theme <-  theme(axis.text=element_text(size=8),
+                     axis.title=element_text(size=9),
+                     legend.text=element_text(size=8),
+                     legend.title=element_text(size=9),
+                     strip.text=element_text(size=8),
+                     plot.title=element_text(size=9),
+                     # Gridlines
+                     panel.grid.major = element_blank(), 
+                     panel.grid.minor = element_blank(),
+                     panel.background = element_blank(), 
+                     axis.line = element_line(colour = "black"),
+                     # Legend
+                     legend.key = element_rect(fill = NA, color=NA),
+                     legend.background = element_rect(fill=alpha('blue', 0)))
+
+
+# make figure
+g_closure_type <- ggplot(data = total_bar, aes(x=percentage, y = continent_clean, fill = short_type_of_closure_clean)) +
+  facet_grid(source~., space = "free_y", scales = "free_y") +
+  geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
+  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 2.1, color = "black", fontface = "bold") +
+  geom_text(aes(label = label_closure_type, x=101, y = continent_clean),hjust = 0, inherit.aes = F, size = 2.2, color = "black") +
+  labs(x = "Percentage of closure types", y = "") +
+  #scale_fill_manual(name = "Category", values = percentage_type) +
+  scale_x_continuous(lim = c(0, 110), breaks = seq(0,100,25)) +
+  theme_bw() + base_theme
+
+g_closure_type
 
 
 
