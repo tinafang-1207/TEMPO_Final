@@ -4,9 +4,10 @@ rm(list = ls())
 
 # load in packages
 library(tidyverse)
+library(scatterpie)
 
 # read in data
-emperical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
+empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
   janitor::clean_names()
 
 modeling <- read.csv("data/Cleaned sheets - Full-text screening - Modeling papers.csv", na.strings = "/") %>%
@@ -17,7 +18,7 @@ country_location <- read.csv("data/country_location.csv")
 # clean data
 
 # emperical data
-emperical_clean <- emperical %>%
+empirical_clean <- empirical %>%
   # remove the first column and the first row
   select(-x) %>%
   slice(-1) %>%
@@ -80,9 +81,8 @@ modeling_clean <- modeling %>%
 # further clean the data to make map
 
 # emperical 
-emperical_map <- emperical_clean %>%
+empirical_count <- empirical_clean %>%
   select(source,country_clean, location_clean, location_clean, case_studied_clean) %>%
-  mutate(case_studied_clean = 1) %>%
   # clean country name
   mutate(country_clean = case_when(country_clean == "Madagascar "~"Madagascar",
                                    country_clean == "Papua New Guinea "~"Papua New Guinea",
@@ -98,13 +98,13 @@ emperical_map <- emperical_clean %>%
                                    .default = country_clean)) %>%
   group_by(country_clean) %>%
   summarize(case_studied_total = sum(case_studied_clean)) %>%
-  # combine with the country geographic locations
-  left_join(country_location, by = "country_clean") %>%
+  # Madagascar should be 36 - the other 3 cases from different papers but focus on the same region
+  mutate(case_studied_total = ifelse(country_clean == "Madagascar", 36, case_studied_total)) %>%
   # add paper type
   mutate(paper_type = "Empirical")
 
 # modeling
-modeling_map <- modeling_clean %>%
+modeling_count <- modeling_clean %>%
   filter(!is.na(country_clean)) %>%
   select(ref_id, country_clean, location_clean, case_number_clean) %>%
   mutate(country_clean = case_when(country_clean == "U.S. (Guam)"~"U.S.(Guam)",
@@ -112,19 +112,44 @@ modeling_map <- modeling_clean %>%
   group_by(country_clean) %>%
   summarize(case_studied_total = sum(case_number_clean)) %>%
   # combine with the country geographic location
-  left_join(country_location, by = "country_clean") %>%
   # add paper type
   mutate(paper_type = "Modeling")
 
-# Combine the two dataframes
-map_total <- bind_rows(emperical_map, modeling_map)
+# calculate total modeling & empirical cases
+total_cases <- bind_rows(empirical_map, modeling_map) %>%
+  group_by(country_clean) %>%
+  summarize(total_cases = sum(case_studied_total)) %>%
+  left_join(empirical_count, by = "country_clean") %>%
+  rename(case_studied_empirical = case_studied_total) %>%
+  select(-paper_type) %>%
+  left_join(modeling_count, by = "country_clean") %>%
+  rename(case_studied_modeling = case_studied_total) %>%
+  select(-paper_type) %>%
+  # change the na to 0 for empirical/modeling paper
+  mutate(case_studied_empirical=ifelse(is.na(case_studied_empirical),0,case_studied_empirical)) %>%
+  mutate(case_studied_modeling = ifelse(is.na(case_studied_modeling),0,case_studied_modeling))
 
+# calculate percentage of empirical and modeling cases
+total_cases_percentage <- total_cases %>%
+  mutate(percentage_empirical = (case_studied_empirical/total_cases)*100) %>%
+  mutate(percentage_empirical = round(percentage_empirical,0)) %>%
+  mutate(percentage_modeling = (case_studied_modeling/total_cases)*100) %>%
+  mutate(percentage_modeling = round(percentage_modeling,0)) %>%
+  #join with the country location in lat/long
+  left_join(country_location, by = "country_clean") %>%
+  #set up the radius
+  mutate(radius = case_when(total_cases>=1 & total_cases <10~3,
+                            total_cases>=10 & total_cases<20~6,
+                            total_cases>=20 & total_cases<30~9,
+                            total_cases>=30 & total_cases<40~12))
+
+
+##############################################################
 
 # read in the world map
 world <- map_data("world") %>%
   filter(region != "Antarctica")
 
-##############################################################
 # Make figure below
 
 # Set theme
@@ -146,47 +171,12 @@ world_theme <- theme(
 
 worldplot <- ggplot() +
   geom_polygon(data = world, aes(x = long, y = lat, group = group), fill = "gray") +
-  geom_point(data = map_total, aes(x = country_long, y = country_lat, color = paper_type, size = case_studied_total, alpha = 0.5)) +
-  geom_text(data = map_total, mapping = aes(x = country_long, y = country_lat, label = country_clean, hjust = hjust, vjust = vjust), size = 2.5) +
+  geom_scatterpie(data = total_cases_percentage,
+                  aes(x = country_long, y = country_lat,r=radius),
+                  cols = c("percentage_empirical", "percentage_modeling"),
+                  color = NA)+
   coord_fixed(1.3) +
-  world_theme + theme(legend.position = "none")
+  theme_bw() + world_theme + theme(legend.position = "bottom")
 
 worldplot
 
-#################################################################
-# Pie chart
-
-# emperical_cases <- emperical_clean %>%
-#   select(source,country_clean, location_clean, location_clean, case_studied_clean) %>%
-#   mutate(case_studied_clean = 1) %>%
-#   # clean country name
-#   mutate(country_clean = case_when(country_clean == "Madagascar "~"Madagascar",
-#                                    country_clean == "Papua New Guinea "~"Papua New Guinea",
-#                                    country_clean == "Norway, and countries in EU (Danish, Swedish, German, Dutch, Belgium)"~"Norway",
-#                                    country_clean == "French Polynesia "~"French Polynesia",
-#                                    country_clean == "Soloman Islands"~"Solomon Islands",
-#                                    .default = country_clean)) %>%
-#   # differentiate Chile(Easter Island), U.S. (Hawaii) and U.S.(Alaska)
-#   mutate(country_clean = case_when(location_clean == "Easter Island, Rapa Nui"~"Chile(Easter Island)",
-#                                    .default = country_clean)) %>%
-#   group_by(country_clean) %>%
-#   summarize(case_studied_total = sum(case_studied_clean))
-# 
-# modeling_cases <- modeling_clean %>%
-#   filter(!is.na(country_clean)) %>%
-#   select(ref_id, country_clean, location_clean, case_number_clean) %>%
-#   mutate(country_clean = case_when(country_clean == "U.S. (Guam)"~"United States",
-#                                    .default = country_clean)) %>%
-#   group_by(country_clean) %>%
-#   summarize(case_studied_total = sum(case_number_clean))
-# 
-# 
-# total_cases <- bind_rows(emperical_cases, modeling_cases) %>%
-#   group_by(country_clean) %>%
-#   summarize(case_studied_total = sum(case_studied_total))
-  
-
-
-
-
-  
