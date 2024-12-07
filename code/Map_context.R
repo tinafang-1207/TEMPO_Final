@@ -6,6 +6,9 @@ rm(list = ls())
 library(tidyverse)
 library(scatterpie)
 
+#set up the plot directory
+plotdir <- "figure"
+
 # read in data
 empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
   janitor::clean_names()
@@ -116,7 +119,7 @@ modeling_count <- modeling_clean %>%
   mutate(paper_type = "Modeling")
 
 # calculate total modeling & empirical cases
-total_cases <- bind_rows(empirical_map, modeling_map) %>%
+total_cases <- bind_rows(empirical_count, modeling_count) %>%
   group_by(country_clean) %>%
   summarize(total_cases = sum(case_studied_total)) %>%
   left_join(empirical_count, by = "country_clean") %>%
@@ -150,33 +153,68 @@ total_cases_percentage <- total_cases %>%
 world <- map_data("world") %>%
   filter(region != "Antarctica")
 
+world_final <- world %>%
+  mutate(has_temporary = case_when(region %in% c("Papua New Guinea",
+                                                 "Indonesia",
+                                                 "Vanuatu",
+                                                 "Fiji",
+                                                 "Solomon Islands",
+                                                 "French Polynesia",
+                                                 "USA",
+                                                 "New Zealand",
+                                                 "Iceland",
+                                                 "Norway",
+                                                 "UK",
+                                                 "Mexico",
+                                                 "Madagascar",
+                                                 "South Africa",
+                                                 "Australia")~"Yes",
+                                   .default = "No"))
+
 # Make figure below
 
 # Set theme
-world_theme <- theme(
-  axis.text = element_blank(),
-  axis.line = element_blank(),
-  axis.ticks = element_blank(),
-  panel.border = element_blank(),
-  panel.grid = element_blank(),
-  axis.title = element_blank(),
-  panel.background = element_rect(fill = "white"),
-  plot.title = element_text(hjust = 0.5),
-  legend.key = element_rect(fill = NA, color=NA),
-  legend.background = element_rect(fill=alpha('blue', 0)),
-  legend.title = element_text(size = 5),
-  legend.text = element_text(size = 5)
-)
+base_theme <- theme(axis.text = element_blank(),
+                    axis.text.y = element_blank(),
+                    axis.title= element_blank(),
+                    axis.ticks = element_blank(),
+                    legend.text=element_text(size=7),
+                    legend.title=element_text(size=8),
+                    strip.text = element_text(size=8),
+                    plot.tag =element_text(size=9),
+                    plot.title=element_blank(),
+                    # Gridlines
+                    panel.grid.major = element_blank(),
+                    panel.grid.minor = element_blank(),
+                    panel.background = element_blank(),
+                    axis.line = element_line(colour = "black"),
+                    # Legend
+                    legend.key = element_rect(fill = NA, color=NA),
+                    legend.background = element_rect(fill=alpha('blue', 0)))
 
+# set the color scale
 
-worldplot <- ggplot() +
-  geom_polygon(data = world, aes(x = long, y = lat, group = group), fill = "gray") +
+country_fill <- c("Yes" = "#7fc97f", "No" = "grey")
+
+paper_fill <- c("percentage_empirical" = "#f0027f", "percentage_modeling" = "#386cb0")
+
+worldplot <- ggplot(world_final, aes(long, lat, fill = has_temporary, group = group)) +
+  geom_map(map = world_final, aes(map_id = region), color = "grey", linewidth = 0.3, show.legend = F) +
+  scale_fill_manual(name = "Has temporary", values = country_fill) +
+  ggnewscale::new_scale_fill() +
   geom_scatterpie(data = total_cases_percentage,
                   aes(x = country_long, y = country_lat,r=radius),
                   cols = c("percentage_empirical", "percentage_modeling"),
-                  color = NA)+
+                  color = "black",
+                  linewidth = 0.3)+
+  scale_fill_manual(name = "Case type", values = paper_fill, labels = c("percentage_empirical" = "Empirical", "percentage_modeling" = "Modeling")) +
   coord_fixed(1.3) +
-  theme_bw() + world_theme + theme(legend.position = "bottom")
+  theme_bw() + base_theme + theme(legend.position = "bottom")
 
 worldplot
+
+# save the world map
+ggsave(worldplot, filename = file.path(plotdir, "Figx_closure_location.png"), width = 7.5, height = 5, units = "in", dpi = 600)
+
+
 
