@@ -2,11 +2,13 @@
 #### clean working environment ####
 rm(list = ls())
 
+setwd <-  
+
 #### read in packages ####
 library(tidyverse)
 library(cluster)  # For clustering algorithms, including Gower distance
-library(factoextra)  # For visualization of clustering
-library(Rtsne)
+library(factoextra)  # For perform mca visualization
+library(FactoMineR) # For perform mca analysis
 
 #### read in data ####
 empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
@@ -80,26 +82,9 @@ data_cluster <- empirical_clean %>%
          information_collected_clean = as.factor(information_collected_clean))
 
 
-# calculate gower distance
-gower_dist <- daisy(data_cluster, metric = "gower")
-gower_dist_mx <- as.matrix(gower_dist)
-
-tsne_result <- Rtsne(gower_dist_mx, is_distance = TRUE, perplexity = 10)
-
-# Create a data frame with t-SNE results
-tsne_data <- as.data.frame(tsne_result$Y)
-colnames(tsne_data) <- c("tSNE1", "tSNE2")
-data_cluster$continent_clean <- empirical_clean$continent_clean
-data_cluster$x <- tsne_data$tSNE1
-data_cluster$y <- tsne_data$tSNE2
 
 
-# Plot t-SNE results
-ggplot(data_cluster) +
-  geom_point(aes(x = x, y = y,  color = continent_clean), size = 3, alpha = 0.7) +
-  labs(x = "t-SNE Dimension 1",
-       y = "t-SNE Dimension 2") +
-  theme_minimal()
+
 
 
 
