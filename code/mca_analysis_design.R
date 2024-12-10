@@ -2,8 +2,6 @@
 #### clean working environment ####
 rm(list = ls())
 
-setwd <-  
-
 #### read in packages ####
 library(tidyverse)
 library(cluster)  # For clustering algorithms, including Gower distance
@@ -62,8 +60,12 @@ empirical_clean <- empirical %>%
          information_collected_clean)
 
 #### Select the variables for clustering ####
-data_cluster <- empirical_clean %>%
-  select(governance_type_design_clean, 
+data_mca <- empirical_clean %>%
+  select(source, #Supplementary variable (not involved in mca analysis)
+         country_clean, #Supplementary variable
+         continent_clean, #Supplementary variable
+         short_type_of_closure_clean, # Supplementary variable
+         governance_type_design_clean, # active variable below
          decision_making_clean, 
          size_bin, 
          length_closed_bin, 
@@ -71,18 +73,82 @@ data_cluster <- empirical_clean %>%
          enforcement_clean, 
          information_collected_clean) %>%
   mutate(length_open_bin = case_when(length_open_bin == "Daily opening; Quarterly opening"~"Daily opening",
-                                     .default = length_open_bin)) %>%
+                                     .default = length_open_bin))
   # convert to factors
-  mutate(governance_type_design_clean = as.factor(governance_type_design_clean),
-         decision_making_clean = as.factor(decision_making_clean),
-         size_bin = as.factor(size_bin),
-         length_open_bin = as.factor(length_open_bin),
-         length_closed_bin = as.factor(length_closed_bin),
-         enforcement_clean = as.factor(enforcement_clean),
-         information_collected_clean = as.factor(information_collected_clean))
+  # mutate(governance_type_design_clean = as.factor(governance_type_design_clean),
+  #        decision_making_clean = as.factor(decision_making_clean),
+  #        size_bin = as.factor(size_bin),
+  #        length_open_bin = as.factor(length_open_bin),
+  #        length_closed_bin = as.factor(length_closed_bin),
+  #        enforcement_clean = as.factor(enforcement_clean),
+  #        information_collected_clean = as.factor(information_collected_clean))
 
 
+# Perform the MCA analysis
+design_mca <- MCA(data_mca, ncp = 5, quali.sup = 1:4, graph = FALSE)
 
+# check the title of design_mca
+print(design_mca)
+
+# check the eigenvalues/variances
+eig_val <- get_eigenvalue(design_mca)
+head(eig_val)
+
+# check the eigenvalues in screeplot
+# This plot demonstrates the percentage of inertia explained by each MCA dimension
+g_screeplot <- fviz_screeplot(design_mca, addlabels = TRUE, ylim = c(0, 20))
+g_screeplot
+
+# Biplot of individuals and variable categories (global patterns weithin the data)
+g_biplot <- fviz_mca_biplot(design_mca, repel = TRUE, ggtheme=theme_minimal())
+g_biplot
+
+# Variable biplot
+# closer to the axis represents the variable mostly correlated with the dimension
+# no other variables seem important to dimension 1 except size bin?
+# nothing contributes to dimension 2???
+g_var_biplot <- fviz_mca_var(design_mca, choice = "mca.cor", repel = TRUE, ggtheme = theme_minimal())
+g_var_biplot
+
+# Variable category biplot
+g_var_cat_biplot <- fviz_mca_var(design_mca, repel = TRUE, ggtheme = theme_minimal())
+g_var_cat_biplot
+
+#Quality of representation for variable categories
+g_var_cat_qua_biplot <- fviz_mca_var(design_mca, col.var = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
+                                     repel = FALSE,
+                                     ggtheme = theme_minimal())
+g_var_cat_qua_biplot
+
+# Check quality of representation in histogram
+g_var_cat_qua_hist <- fviz_cos2(design_mca, choice = "var", axes = 1:2)
+g_var_cat_qua_hist
+
+# Contribution of variable categories to the dimension
+# histogram
+g_var_cat_cont_hist_d1 <- fviz_contrib(design_mca, choice = "var", axes=1, top=15)
+g_var_cat_cont_hist_d1
+
+g_var_cat_cont_hist_d2 <- fviz_contrib(design_mca, choice = "var", axes=2, top=15)
+g_var_cat_cont_hist_d2
+
+#biplot
+g_var_cat_cont_biplot <- fviz_mca_var(design_mca, col.var = "contrib", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
+                                      repel = FALSE,
+                                      ggtheme = theme_minimal())
+g_var_cat_cont_biplot
+
+# individual quality
+g_ind_qua_biplot <- fviz_mca_ind(design_mca, col.ind = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
+                                 repel = TRUE,
+                                 ggtheme = theme_minimal())
+g_ind_qua_biplot
+
+# individual contribution
+g_ind_cont_biplot <- fviz_mca_ind(design_mca, col.ind = "contrib", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
+                                  repel = TRUE,
+                                  ggtheme = theme_minimal())
+g_ind_cont_biplot
 
 
 
