@@ -4,9 +4,11 @@ rm(list = ls())
 
 #### read in packages ####
 library(tidyverse)
-library(cluster)  # For clustering algorithms, including Gower distance
-library(factoextra)  # For perform mca visualization
-library(FactoMineR) # For perform mca analysis
+library(factoextra)  # For perform famd visualization
+library(FactoMineR) # For perform famd analysis
+
+
+
 
 #### read in data ####
 empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
@@ -25,7 +27,7 @@ empirical_clean <- empirical %>%
          size_bin = size_of_closure_clean,
          length_closed_stan_years = length_of_time_closed_range_standardized_to_years,
          length_closed_bin = length_close_clean,
-         length_open_stan_days = length_of_time_open_range_standardized_to_days,
+         length_open_stan_days = length_of_time_open_range_standardized_to_years,
          length_open_bin = length_open_clean
   ) %>%
   # keep only the cleaned column (remove the original quote column)
@@ -59,96 +61,89 @@ empirical_clean <- empirical %>%
          enforcement_clean,
          information_collected_clean)
 
-#### Select the variables for clustering ####
-data_mca <- empirical_clean %>%
+#### Select the variables for FAMD ####
+data_famd <- empirical_clean %>%
   select(source, #Supplementary variable (not involved in mca analysis)
          country_clean, #Supplementary variable
          continent_clean, #Supplementary variable
          short_type_of_closure_clean, # Supplementary variable
          governance_type_design_clean, # active variable below
-         decision_making_clean, 
-         size_bin, 
-         length_closed_bin, 
-         length_open_bin, 
-         enforcement_clean, 
-         information_collected_clean) %>%
-  mutate(length_open_bin = case_when(length_open_bin == "Daily opening; Quarterly opening"~"Daily opening",
-                                     .default = length_open_bin))
-  # convert to factors
-  # mutate(governance_type_design_clean = as.factor(governance_type_design_clean),
-  #        decision_making_clean = as.factor(decision_making_clean),
-  #        size_bin = as.factor(size_bin),
-  #        length_open_bin = as.factor(length_open_bin),
-  #        length_closed_bin = as.factor(length_closed_bin),
-  #        enforcement_clean = as.factor(enforcement_clean),
-  #        information_collected_clean = as.factor(information_collected_clean))
+         decision_making_clean,
+         criteria_open_clean,
+         size_stan_ha, 
+         length_closed_stan_years, 
+         species_category_clean, 
+         enforcement_clean) %>%
+  # clean the variable categories
+  mutate(governance_type_design_clean = ifelse(governance_type_design_clean == "Co-managment", "Co-management", governance_type_design_clean))%>%
+  mutate(decision_making_clean = ifelse(decision_making_clean == "Community village led", "Community/village led", decision_making_clean)) %>%
+  mutate(enforcement_clean = ifelse(enforcement_clean == "Goverment led", "Government led", enforcement_clean)) %>%
+  mutate(species_category_clean = ifelse(species_category_clean == "Finfish", "Reef fish", species_category_clean)) %>%
+  # change the variable category labels
+  mutate(governance_type_design_clean = case_when(governance_type_design_clean == "Bottom-up"~"B",
+                                                  governance_type_design_clean == "Co-management"~"C",
+                                                  governance_type_design_clean == "Top-down"~"T")) %>%
+  mutate(decision_making_clean = case_when(decision_making_clean == "Community/village led"~"CL",
+                                           decision_making_clean == "Collaboration community-government"~"CGC",
+                                           decision_making_clean == "Government led"~"GL",
+                                           decision_making_clean == "Collaboration community-NGO"~"CNC",
+                                           decision_making_clean == "Others (Academia institution led)"~"O")) %>%
+  mutate(criteria_open_clean = case_when(criteria_open_clean == "Social"~"S",
+                                         criteria_open_clean == "Fisheries management/Fishing income"~"FM/FI",
+                                         criteria_open_clean == "Governance"~"G",
+                                         criteria_open_clean == "Ecosystem/Conservation"~"E/C")) %>%
+  mutate(species_category_clean = case_when(species_category_clean == "Reef fish"~"RF",
+                                            species_category_clean == "Pelagic fish"~"PF",
+                                            species_category_clean == "Invertebrates"~"IN",
+                                            species_category_clean == "Marine mammals/sea turtles/seabirds"~"MM",
+                                            species_category_clean == "Demersal fish"~"DF")) %>%
+  mutate(enforcement_clean = case_when(enforcement_clean == "Community/village led"~"CL",
+                                       enforcement_clean == "Collaboration community-government"~"CGC",
+                                       enforcement_clean == "Government led"~"GL",
+                                       enforcement_clean == "No enforcement"~"NE",
+                                       enforcement_clean == "Collaboration community-NGO-government"~"CNGC",
+                                       enforcement_clean == "Collaboration community-NGO"~"CNC",
+                                       enforcement_clean == "NGO led"~"NL")) %>%
+  mutate(size_stan_ha = as.numeric(gsub(",", "", size_stan_ha)),
+         length_closed_stan_years = as.numeric(gsub(",","", length_closed_stan_years))) %>%
+  na.omit()
 
 
-# Perform the MCA analysis
-design_mca <- MCA(data_mca, ncp = 5, quali.sup = 1:4, graph = FALSE)
+data_famd_exp <- empirical_clean %>%  
+  select(source, #Supplementary variable (not involved in mca analysis)
+         country_clean, #Supplementary variable
+         continent_clean, #Supplementary variable
+         short_type_of_closure_clean, # Supplementary variable
+         governance_type_design_clean, # active variable below
+         size_stan_ha, 
+         length_closed_stan_years) %>%
+  # clean the variable categories
+  mutate(governance_type_design_clean = ifelse(governance_type_design_clean == "Co-managment", "Co-management", governance_type_design_clean))%>%
+  # change the variable category labels
+  mutate(governance_type_design_clean = case_when(governance_type_design_clean == "Bottom-up"~"B",
+                                                  governance_type_design_clean == "Co-management"~"C",
+                                                  governance_type_design_clean == "Top-down"~"T"))
 
-# check the title of design_mca
-print(design_mca)
 
-# check the eigenvalues/variances
-eig_val <- get_eigenvalue(design_mca)
-head(eig_val)
+# Perform factor analysis of mixed data
 
-# check the eigenvalues in screeplot
-# This plot demonstrates the percentage of inertia explained by each MCA dimension
-g_screeplot <- fviz_screeplot(design_mca, addlabels = TRUE, ylim = c(0, 20))
-g_screeplot
+design_famd <- FAMD(data_famd, sup.var = 1:4, graph = FALSE, ncp = 5)
 
-# Biplot of individuals and variable categories (global patterns weithin the data)
-g_biplot <- fviz_mca_biplot(design_mca, repel = TRUE, ggtheme=theme_minimal())
-g_biplot
+eig_val <- get_eigenvalue(design_famd)
 
-# Variable biplot
-# closer to the axis represents the variable mostly correlated with the dimension
-# no other variables seem important to dimension 1 except size bin?
-# nothing contributes to dimension 2???
-g_var_biplot <- fviz_mca_var(design_mca, choice = "mca.cor", repel = TRUE, ggtheme = theme_minimal())
-g_var_biplot
+fviz_famd_var(design_famd, repel = TRUE)
 
-# Variable category biplot
-g_var_cat_biplot <- fviz_mca_var(design_mca, repel = TRUE, ggtheme = theme_minimal())
-g_var_cat_biplot
+fviz_famd_var(design_famd, "quanti.var", repel = TRUE,
+              col.var = "black")
 
-#Quality of representation for variable categories
-g_var_cat_qua_biplot <- fviz_mca_var(design_mca, col.var = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
-                                     repel = FALSE,
-                                     ggtheme = theme_minimal())
-g_var_cat_qua_biplot
+ggplot(data_famd %>% select(size_stan_ha), aes(x = size_stan_ha)) +
+  geom_histogram(stat = "count", bins = 5)
 
-# Check quality of representation in histogram
-g_var_cat_qua_hist <- fviz_cos2(design_mca, choice = "var", axes = 1:2)
-g_var_cat_qua_hist
 
-# Contribution of variable categories to the dimension
-# histogram
-g_var_cat_cont_hist_d1 <- fviz_contrib(design_mca, choice = "var", axes=1, top=15)
-g_var_cat_cont_hist_d1
 
-g_var_cat_cont_hist_d2 <- fviz_contrib(design_mca, choice = "var", axes=2, top=15)
-g_var_cat_cont_hist_d2
 
-#biplot
-g_var_cat_cont_biplot <- fviz_mca_var(design_mca, col.var = "contrib", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
-                                      repel = FALSE,
-                                      ggtheme = theme_minimal())
-g_var_cat_cont_biplot
 
-# individual quality
-g_ind_qua_biplot <- fviz_mca_ind(design_mca, col.ind = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
-                                 repel = TRUE,
-                                 ggtheme = theme_minimal())
-g_ind_qua_biplot
 
-# individual contribution
-g_ind_cont_biplot <- fviz_mca_ind(design_mca, col.ind = "contrib", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
-                                  repel = TRUE,
-                                  ggtheme = theme_minimal())
-g_ind_cont_biplot
 
 
 
