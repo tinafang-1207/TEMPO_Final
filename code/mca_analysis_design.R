@@ -27,7 +27,7 @@ empirical_clean <- empirical %>%
          size_bin = size_of_closure_clean,
          length_closed_stan_years = length_of_time_closed_range_standardized_to_years,
          length_closed_bin = length_close_clean,
-         length_open_stan_days = length_of_time_open_range_standardized_to_years,
+         length_open_stan_years = length_of_time_open_range_standardized_to_years,
          length_open_bin = length_open_clean
   ) %>%
   # keep only the cleaned column (remove the original quote column)
@@ -53,7 +53,7 @@ empirical_clean <- empirical %>%
          size_bin,
          length_closed_stan_years,
          length_closed_bin,
-         length_open_stan_days,
+         length_open_stan_years,
          length_open_bin,
          percentage_fishing_ground_closed_clean,
          number_of_species_clean,
@@ -66,12 +66,13 @@ data_famd <- empirical_clean %>%
   select(source, #Supplementary variable (not involved in mca analysis)
          country_clean, #Supplementary variable
          continent_clean, #Supplementary variable
-         short_type_of_closure_clean, # Supplementary variable
-         governance_type_design_clean, # active variable below
+         short_type_of_closure_clean,
+         governance_type_design_clean,
          decision_making_clean,
          criteria_open_clean,
          size_stan_ha, 
-         length_closed_stan_years, 
+         length_closed_stan_years,
+         length_open_stan_years,
          species_category_clean, 
          enforcement_clean) %>%
   # clean the variable categories
@@ -101,29 +102,18 @@ data_famd <- empirical_clean %>%
                                        enforcement_clean == "Collaboration community-government"~"CGC",
                                        enforcement_clean == "Government led"~"GL",
                                        enforcement_clean == "No enforcement"~"NE",
-                                       enforcement_clean == "Collaboration community-NGO-government"~"CNGC",
                                        enforcement_clean == "Collaboration community-NGO"~"CNC",
                                        enforcement_clean == "NGO led"~"NL")) %>%
   mutate(size_stan_ha = as.numeric(gsub(",", "", size_stan_ha)),
-         length_closed_stan_years = as.numeric(gsub(",","", length_closed_stan_years))) %>%
-  na.omit()
+         length_closed_stan_years = as.numeric(gsub(",","", length_closed_stan_years)),
+         length_open_stan_years = as.numeric(gsub(",","", length_open_stan_years))) %>%
+  na.omit() %>%
+  mutate(size_stan_log = log(size_stan_ha+1),
+         length_closed_stan_years_log = log(length_closed_stan_years+1),
+         length_open_stan_years_log = log(length_open_stan_years+1))%>%
+  select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years, -decision_making_clean, -enforcement_clean, -criteria_open_clean, -species_category_clean)
 
-
-data_famd_exp <- empirical_clean %>%  
-  select(source, #Supplementary variable (not involved in mca analysis)
-         country_clean, #Supplementary variable
-         continent_clean, #Supplementary variable
-         short_type_of_closure_clean, # Supplementary variable
-         governance_type_design_clean, # active variable below
-         size_stan_ha, 
-         length_closed_stan_years) %>%
-  # clean the variable categories
-  mutate(governance_type_design_clean = ifelse(governance_type_design_clean == "Co-managment", "Co-management", governance_type_design_clean))%>%
-  # change the variable category labels
-  mutate(governance_type_design_clean = case_when(governance_type_design_clean == "Bottom-up"~"B",
-                                                  governance_type_design_clean == "Co-management"~"C",
-                                                  governance_type_design_clean == "Top-down"~"T"))
-
+# The ideal result contains only government_type_design_clean, size_stan_log, length_closed_stan_years_log, length_open_stan_years_log
 
 # Perform factor analysis of mixed data
 
@@ -133,13 +123,11 @@ eig_val <- get_eigenvalue(design_famd)
 
 fviz_famd_var(design_famd, repel = TRUE)
 
-fviz_famd_var(design_famd, "quanti.var", repel = TRUE,
-              col.var = "black")
+fviz_contrib(design_famd, "var", axes = 1)
+fviz_contrib(design_famd, "var", axes = 2)
 
-ggplot(data_famd %>% select(size_stan_ha), aes(x = size_stan_ha)) +
-  geom_histogram(stat = "count", bins = 5)
-
-
+fviz_famd_ind(design_famd, col.ind = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
+              repel = TRUE)
 
 
 
