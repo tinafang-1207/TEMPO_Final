@@ -8,8 +8,6 @@ library(factoextra)  # For perform famd visualization
 library(FactoMineR) # For perform famd analysis
 
 
-
-
 #### read in data ####
 empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
   janitor::clean_names()
@@ -123,17 +121,55 @@ eig_val <- get_eigenvalue(design_famd)
 
 fviz_famd_var(design_famd, repel = TRUE)
 
+# screeplots of the two dimensions
 fviz_contrib(design_famd, "var", axes = 1)
 fviz_contrib(design_famd, "var", axes = 2)
+
+# visualize quantitative variables
+quanti_var <- get_famd_var(design_famd, "quanti.var")
+quanti_var
+
+fviz_famd_var(design_famd, "quanti.var", repel = TRUE, col.var = "black")
+
+# visualize individual case
+
 
 fviz_famd_ind(design_famd, col.ind = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
               repel = TRUE)
 
+# fviz_mfa_ind(design_famd, 
+#              habillage = "governance_type_design_clean",
+#              palette = c("#00AFBB", "#E7B800", "#FC4E07"), 
+#              addEllipse = TRUE, ellipse.type = "confidence",
+#              repel = TRUE)
 
+# plot the individual clusters grouped by supplementary variable
+ind <- get_famd_ind(design_famd)
 
+ind_coord <- as.data.frame(ind[["coord"]]) %>%
+  select(-Dim.3, -Dim.4, -Dim.5) %>%
+  rename(coord_dim1 = Dim.1,
+         coord_dim2 = Dim.2)
 
+ind_cos2 <- as.data.frame(ind[["cos2"]]) %>%
+  select(-Dim.3, -Dim.4, -Dim.5) %>%
+  rename(cos_dim1 = Dim.1,
+         cos_dim2 = Dim.2)
 
+ind_contrib <- as.data.frame(ind[["contrib"]]) %>%
+  select(-Dim.3, -Dim.4, -Dim.5) %>%
+  rename(contrib_dim1 = Dim.1,
+         contrib_dim2 = Dim.2)
 
+ind_total <- cbind(ind_coord, ind_cos2, ind_contrib) %>%
+  mutate(case_num = rownames(ind_total)) %>%
+  select(case_num, everything()) %>%
+  cbind(data_famd)
 
+# color by type of closure
+ggplot(data = ind_total, aes(x = coord_dim1, y = coord_dim2, color = short_type_of_closure_clean)) +
+  geom_point()
 
-
+# color by continent
+ggplot(data = ind_total, aes(x = coord_dim1, y = coord_dim2, color = continent_clean)) +
+  geom_point()
