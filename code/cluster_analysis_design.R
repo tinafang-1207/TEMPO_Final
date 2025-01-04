@@ -8,6 +8,9 @@ library(factoextra)  # For perform famd visualization
 library(FactoMineR) # For perform famd analysis
 library(cluster) # For hierarchical clustering
 
+### specify plot directory ###
+plotdir <- "figure"
+
 #### read in data ####
 empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
   janitor::clean_names()
@@ -199,23 +202,27 @@ silhouette_score <- silhouette(clusters, dist(factor_scores))
 plot(silhouette_score)
 
 # visualize the cluster in dendrogram
-fviz_dend(hc, k = 6,
+g1 <- fviz_dend(hc, k = 6,
           cex = 0.5, # label size
-          k_colors= c("#e9c39b", "#ea6b73", "#6ba3d6", "#ac613c", "#f02720", "#2c69b0"),
+          k_colors= c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
           color_labels_by_k = TRUE,
           rect = TRUE)
 
-# visualize the cluster in scatter plot
-data_cluster <- data_famd %>%
-  select(governance_type_design_clean, size_stan_log, length_closed_stan_years_log, length_open_stan_years_log) %>%
-  mutate(governance_type_design_clean = as.numeric(factor(governance_type_design_clean)))
+g1
 
-fviz_cluster(list(data = factor_scores, cluster = clusters),
-             palette = c("#e9c39b", "#ea6b73", "#6ba3d6", "#ac613c", "#f02720", "#2c69b0"),
+# visualize the cluster in scatter plot
+g2 <- fviz_cluster(list(data = factor_scores, cluster = clusters),
+             palette = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
              ellipse.type = "convex",
              repel = TRUE,
-             show.cluster.cent = FALSE, 
-             ggtheme = theme_minimal())
+             show.cluster.cent = FALSE)
+
+g2
+
+## save the cluster plot (preliminary)
+ggsave(g1, filename = file.path(plotdir, "Figx_dendrogram_cluster.png"), width = 5, height = 3, units = "in", dpi = 600)
+
+ggsave(g2, filename = file.path(plotdir, "Figx_scatter_cluster.png"), width = 4, height = 3, units = "in", dpi = 600)
 
 ######################################################################
 
