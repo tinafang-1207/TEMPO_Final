@@ -72,6 +72,13 @@ empirical_group <- empirical_clean %>%
     row_number() %in% c(25,32,33,30,31,14,27,13,15,3,4,2,5,9,19,6,10,7,11)~"cluster 6"
   ))
 
+# Cluster 1 Top-down dynamic closures
+# Cluster 2 medium term-closure (<5), short opening time (in days)
+# Cluster 3 Determinate closure
+# Cluster 4 long term-closure (>5), short opening time (in days)
+# Cluster 5 co-managed dynamic closures
+# Cluster 6 annual closure (<1 or around 1 year), relative long opening (days-weeks-month)
+
 ##############################################################################
 #Do an experimental plot of motivation
 
@@ -104,26 +111,37 @@ motivation_percent <- motivation_summarize %>%
          -`Governance`,
          -`Others`,
          -`Social`,
-         -`case_total`)
+         -`case_total`) %>%
+  rename(`Ecosystem/Conservation` = eco_percentage,
+         `Management/Income` = fish_percentage,
+         Governance = gov_percentage,
+         Social = social_percentage,
+         Others = other_percentage)
 
 
 ggradar(
   motivation_percent, 
-  values.radar = c("0", "50", "100"),
+  values.radar = c("0", "50%", "100%"),
   grid.min = 0, grid.mid = 50, grid.max = 100,
   # Polygons
-  group.line.width = 1, 
-  group.point.size = 3,
+  group.line.width = 0.5, 
+  group.point.size = 1.5,
   group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
   # Background and grid lines
-  background.circle.colour = "white",
-  gridline.mid.colour = "grey",
-  legend.position = "bottom"
-)
-
-
-
-
+  background.circle.colour = "gray",
+  gridline.mid.colour = "skyblue",
+  # Label size
+  axis.label.size = 3,
+  grid.label.size = 5,
+  # legend
+  legend.position = "none"
+) +
+  labs(title = "Motivation") +
+  theme(plot.title.position = "panel",
+        plot.title = element_text(
+          size = 10,
+          face = "bold"
+        ))
 
 
 
