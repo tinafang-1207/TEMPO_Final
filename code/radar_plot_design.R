@@ -119,7 +119,7 @@ motivation_percent <- motivation_summarize %>%
          Others = other_percentage)
 
 
-ggradar(
+motivation <- ggradar(
   motivation_percent, 
   values.radar = c("0", "50%", "100%"),
   grid.min = 0, grid.mid = 50, grid.max = 100,
@@ -134,7 +134,7 @@ ggradar(
   axis.label.size = 3,
   grid.label.size = 5,
   # legend
-  legend.position = "none"
+  legend.position = "bottom"
 ) +
   labs(title = "Motivation") +
   theme(plot.title.position = "panel",
@@ -143,6 +143,7 @@ ggradar(
           face = "bold"
         ))
 
+ggsave(motivation, filename = file.path(plotdir, "Figx_motivation.png"), width = 5, height = 4, units = "in", dpi = 600 )
 
 
 

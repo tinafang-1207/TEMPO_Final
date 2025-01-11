@@ -142,7 +142,7 @@ base_theme <-  theme(axis.text=element_text(size=8),
                      # Gridlines
                      panel.grid.major = element_blank(), 
                      panel.grid.minor = element_blank(),
-                     panel.background = element_blank(), 
+                     panel.background = element_blank(),
                      axis.line = element_line(colour = "black"),
                      # Legend
                      legend.key = element_rect(fill = NA, color=NA),

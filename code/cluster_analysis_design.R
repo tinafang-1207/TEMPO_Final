@@ -114,7 +114,7 @@ data_famd <- empirical_clean %>%
   mutate(size_stan_log = log(size_stan_ha+1),
          length_closed_stan_years_log = log(length_closed_stan_years+1),
          length_open_stan_years_log = log(length_open_stan_years+1))%>%
-  select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years, -decision_making_clean, -enforcement_clean, -criteria_open_clean, -species_category_clean)
+  select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years)
 
 # The ideal result contains only government_type_design_clean, size_stan_log, length_closed_stan_years_log, length_open_stan_years_log
 
@@ -130,17 +130,14 @@ fviz_famd_var(design_famd, repel = TRUE)
 fviz_contrib(design_famd, "var", axes = 1)
 fviz_contrib(design_famd, "var", axes = 2)
 
-# visualize quantitative variables
-quanti_var <- get_famd_var(design_famd, "quanti.var")
-quanti_var
-
-fviz_famd_var(design_famd, "quanti.var", repel = TRUE, col.var = "black")
 
 # visualize individual case
 
 
-fviz_famd_ind(design_famd, col.ind = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
+g_indv <- fviz_famd_ind(design_famd, col.ind = "cos2", gradient.cols = c("#00afbb", "#e7b800", "#fc4e07"),
               repel = TRUE)
+
+g_indv
 
 # fviz_mfa_ind(design_famd, 
 #              habillage = "governance_type_design_clean",
@@ -193,11 +190,11 @@ distance_matrix <- dist(factor_scores)
 hc <- hclust(distance_matrix, method = "ward.D2")
 plot(hc)
 
-rect.hclust(hc, k = 6, border = "red")
+rect.hclust(hc, k = 5, border = "red")
 
 # calculate sillhouette scores
 # the cluster of 4 gives the clusters in 0.5, which is the acceptable threshold for clear clusters
-clusters <- cutree(hc, k = 6)
+clusters <- cutree(hc, k = 5)
 silhouette_score <- silhouette(clusters, dist(factor_scores))
 plot(silhouette_score)
 
@@ -223,6 +220,8 @@ g2
 ggsave(g1, filename = file.path(plotdir, "Figx_dendrogram_cluster.png"), width = 5, height = 3, units = "in", dpi = 600)
 
 ggsave(g2, filename = file.path(plotdir, "Figx_scatter_cluster.png"), width = 4, height = 3, units = "in", dpi = 600)
+
+ggsave(g_indv, filename = file.path(plotdir, "Figx_individual_cluster.png"), width = 5, height = 4, units = "in", dpi = 600 )
 
 ######################################################################
 
