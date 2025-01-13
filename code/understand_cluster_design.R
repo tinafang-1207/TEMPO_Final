@@ -146,7 +146,7 @@ empirical_quali_govern <- empirical_group %>%
                                 cluster == "D"~7,
                                 cluster == "E"~2,
                                 cluster == "F"~3)) %>%
-  mutate(cluster = factor(cluster, levels = c("F", "E", "D", "C", "B", "A"))) %>%
+  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
   mutate(percentage = (type_count/total_case)*100) %>%
   mutate(percentage = round(percentage, 0)) %>%
   mutate(label = paste0(percentage, "%")) %>%
@@ -160,7 +160,7 @@ empirical_quali_decision <- empirical_group %>%
   select(decision_making_clean, cluster) %>%
   group_by(cluster, decision_making_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("F", "E", "D", "C", "B", "A"))) %>%
+  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
   mutate(total_case = case_when(cluster == "A"~19,
                                 cluster == "B"~11,
                                 cluster == "C"~7,
@@ -179,7 +179,7 @@ empirical_quali_open <- empirical_group %>%
   select(criteria_open_clean, cluster) %>%
   group_by(cluster, criteria_open_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("F", "E", "D", "C", "B", "A"))) %>%
+  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
   mutate(total_case = case_when(cluster == "A"~19,
                                 cluster == "B"~11,
                                 cluster == "C"~7,
@@ -198,7 +198,7 @@ empirical_quali_species <- empirical_group %>%
   select(species_category_clean, cluster) %>%
   group_by(cluster, species_category_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("F", "E", "D", "C", "B", "A"))) %>%
+  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
   mutate(total_case = case_when(cluster == "A"~19,
                                 cluster == "B"~11,
                                 cluster == "C"~7,
@@ -217,7 +217,7 @@ empirical_quali_enforcement <- empirical_group %>%
   select(enforcement_clean, cluster) %>%
   group_by(cluster, enforcement_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("F", "E", "D", "C", "B", "A"))) %>%
+  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
   mutate(total_case = case_when(cluster == "A"~19,
                                 cluster == "B"~11,
                                 cluster == "C"~7,
@@ -263,6 +263,8 @@ g_quanti_final <- ggplot(empirical_quanti, aes(x = cluster, y = Value, fill = cl
   facet_wrap(.~Variable, scales = "free_y") +
   boxplot_theme + theme(legend.position = "none")
 
+g_quanti_final
+
 #######################################################################
 # Barplot of qualitative variables
 # import theme
@@ -284,99 +286,111 @@ barplot_theme <- theme(axis.text=element_text(size=8),
 # governance
 govern_type = c("C" = "#0099b4", "B" = "#925e9f", "T" = "#fdaf91")
 
-g_quali_govern <- ggplot(data = empirical_quali_govern, aes(x=percentage, y = cluster, fill = variable_category)) +
+g1 <- ggplot(data = empirical_quali_govern, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 2.1, color = "black", fontface = "bold") +
-  scale_fill_manual(name = "Types", values = govern_type) +
-  scale_x_continuous(lim = c(0, 120), breaks = seq(0,100,25)) +
+  labs(y = "Case count") +
+  scale_fill_manual(name = "Categories", values = govern_type) +
+  scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
   theme_bw() + barplot_theme + theme(axis.title.x = element_blank(),
                                      axis.text.x = element_blank(),
                                      axis.ticks.x = element_blank(),
-                                     axis.title.y = element_blank(),
-                                     legend.position = c(0.9, 0.8))
+                                     legend.position = c(0.8, 0.75),
+                                     legend.key.size = unit(0.5, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 
-g_quali_govern
+g1
 
 # decision making process
 decision_type = c("CGC" = "#ed0000", "CNC" = "#42b540", "CL" = "#0099b4", "GL" = "#925e9f", "AL" = "#fdaf91")
 
 
-g_quali_decision <- ggplot(data = empirical_quali_decision, aes(x=percentage, y = cluster, fill = variable_category)) +
+g2 <- ggplot(data = empirical_quali_decision, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 2.1, color = "black", fontface = "bold") +
-  scale_fill_manual(name = "Types", values = decision_type) +
-  scale_x_continuous(lim = c(0, 120), breaks = seq(0,100,25)) +
+  scale_fill_manual(name = "Categories", values = decision_type) +
+  scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
   theme_bw() + barplot_theme + theme(axis.title.x = element_blank(),
                                      axis.text.x = element_blank(),
                                      axis.ticks.x = element_blank(),
                                      axis.title.y = element_blank(),
-                                     legend.position = c(0.9, 0.75))
-g_quali_decision
+                                     axis.text.y = element_blank(),
+                                     axis.ticks.y = element_blank(),
+                                     legend.position = c(0.8, 0.75),
+                                     legend.key.size = unit(0.5, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
+g2
 
 # criteria open
 open_type <- c("S" = "#42b540", "G" = "#0099b4", "FM/FI" = "#925e9f", "E/C" = "#fdaf91")
 
-g_quali_open <- ggplot(data = empirical_quali_open, aes(x=percentage, y = cluster, fill = variable_category)) +
+g3 <- ggplot(data = empirical_quali_open, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 2.1, color = "black", fontface = "bold") +
-  scale_fill_manual(name = "Types", values = open_type) +
-  scale_x_continuous(lim = c(0, 120), breaks = seq(0,100,25)) +
-  theme_bw() + barplot_theme + theme(axis.title.x = element_blank(),
-                                     axis.text.x = element_blank(),
-                                     axis.ticks.x = element_blank(),
-                                     axis.title.y = element_blank(),
-                                     legend.position = c(0.9, 0.8))
-g_quali_open
+  labs(x = "Cluster") +
+  scale_fill_manual(name = "Categories", values = open_type) +
+  scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
+  theme_bw() + barplot_theme + theme(axis.title.y = element_blank(),
+                                     axis.text.y = element_blank(),
+                                     axis.ticks.y = element_blank(),
+                                     legend.position = c(0.8, 0.75),
+                                     legend.key.size = unit(0.5, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
+g3
 
 # target species
 
 species_type = c("DF" = "#ed0000", "RF" = "#42b540", "IN" = "#0099b4", "PF" = "#925e9f", "MM" = "#fdaf91")
 
-g_quali_species <- ggplot(data = empirical_quali_species, aes(x=percentage, y = cluster, fill = variable_category)) +
+g4 <- ggplot(data = empirical_quali_species, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 2.1, color = "black", fontface = "bold") +
-  scale_fill_manual(name = "Types", values = species_type) +
-  scale_x_continuous(lim = c(0, 120), breaks = seq(0,100,25)) +
-  theme_bw() + barplot_theme + theme(axis.title.x = element_blank(),
-                                     axis.text.x = element_blank(),
-                                     axis.ticks.x = element_blank(),
-                                     axis.title.y = element_blank(),
-                                     legend.position = c(0.9, 0.75))
-g_quali_species
+  labs(x = "Cluster", y = "Case count") +
+  scale_fill_manual(name = "Categories", values = species_type) +
+  scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
+  theme_bw() + barplot_theme + theme(legend.position = c(0.8, 0.75),
+                                     legend.key.size = unit(0.5, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
+
+
+g4
 
 
 # enforcement
 
 enforcement_type = c("CGC" = "#ed0000", "CNC" = "#42b540", "CL" = "#0099b4", "GL" = "#925e9f", "NE" = "#fdaf91")
 
-g_quali_enforcement <- ggplot(data = empirical_quali_enforcement, aes(x=percentage, y = cluster, fill = variable_category)) +
+g5 <- ggplot(data = empirical_quali_enforcement, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  geom_text(aes(label = label), position = position_stack(vjust = 0.5), size = 2.1, color = "black", fontface = "bold") +
-  scale_fill_manual(name = "Types", values = enforcement_type) +
-  scale_x_continuous(lim = c(0, 120), breaks = seq(0,100,25)) +
-  theme_bw() + barplot_theme + theme(axis.title.x = element_blank(),
-                                     axis.title.y = element_blank(),
-                                     legend.position = c(0.9, 0.75))
+  labs(x = "Cluster") +
+  scale_fill_manual(name = "Categories", values = enforcement_type) +
+  scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
+  theme_bw() + barplot_theme + theme(axis.title.y = element_blank(),
+                                     axis.text.y = element_blank(),
+                                     axis.ticks.y = element_blank(),
+                                     legend.position = c(0.8, 0.75),
+                                     legend.key.size = unit(0.5, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 
-g_quali_enforcement
+g5
 
-g_quali_govern_f <- ggplotGrob(g_quali_govern)
-g_quali_decision_f <- ggplotGrob(g_quali_decision)
-g_quali_open_f <- ggplotGrob(g_quali_open)
-g_quali_species_f <- ggplotGrob(g_quali_species)
-g_quali_enforcement_f <- ggplotGrob(g_quali_enforcement)
+ 
+# Merge qualitative variable
+ 
 
-g_quali_final <- rbind(g_quali_govern_f,
-                       g_quali_decision_f,
-                       g_quali_open_f,
-                       g_quali_species_f,
-                       g_quali_enforcement_f)
-g_quali_final
+
+g_quali <- gridExtra::grid.arrange(g1,g2,g3,g4,g5, ncol = 3, widths = c(3, 3, 3), heights = c(2,2))
+
+layout_matrix <- matrix(data = c(1,2), nrow = 2, byrow = TRUE)
+
+g_total <- gridExtra::grid.arrange(g_quanti_final, g_quali, layout_matrix = layout_matrix, heights = c(1,2.5))
+
 
 ggsave(g_quali_final, filename = file.path(plotdir, "Figx_qualitative_variable_cluster.png"), width = 7.5, height = 18, units = "in", dpi = 600)
 
