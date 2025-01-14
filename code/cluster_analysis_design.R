@@ -120,7 +120,7 @@ data_famd <- empirical_clean %>%
 
 # Perform factor analysis of mixed data
 
-design_famd <- FAMD(data_famd, sup.var = 1:4, graph = FALSE, ncp = 5)
+design_famd <- FAMD(data_famd, sup.var = 1:4, graph = FALSE, ncp = 10)
 
 eig_val <- get_eigenvalue(design_famd)
 
