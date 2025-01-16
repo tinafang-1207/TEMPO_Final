@@ -7,6 +7,7 @@ library(tidyverse)
 library(factoextra)  # For perform famd visualization
 library(FactoMineR) # For perform famd analysis
 library(cluster) # For hierarchical clustering
+library(psych) # For KMO and Bartlett test
 
 ### specify plot directory ###
 plotdir <- "figure"
@@ -113,18 +114,77 @@ data_famd <- empirical_clean %>%
   na.omit() %>%
   mutate(size_stan_log = log(size_stan_ha+1),
          length_closed_stan_years_log = log(length_closed_stan_years+1),
-         length_open_stan_years_log = log(length_open_stan_years+1))%>%
-  select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years)
+         length_open_stan_years_log = log(length_open_stan_years+1))
+  # select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years)
+#########################################################################################
+# Test data for the assumption of colliniarity
 
-# The ideal result contains only government_type_design_clean, size_stan_log, length_closed_stan_years_log, length_open_stan_years_log
+# quantitative variables
+quant_variables <-data_famd %>%
+  select(size_stan_ha, length_closed_stan_years, length_open_stan_years,
+         size_stan_log, length_closed_stan_years_log, length_open_stan_years_log)
+
+# kmo and Barttlett test
+kmo_result <- KMO(quant_variables)
+print(kmo_result)
+
+bartlett_result <- bartlett.test(quant_variables)
+print(bartlett_result)
+
+# multicollinearity
+cor_matrix <- cor(quant_variables)
+cor_matrix
+
+# qualitative variables
+quali_variables <- data_famd %>%
+  select(governance_type_design_clean,
+         decision_making_clean,
+         criteria_open_clean,
+         species_category_clean,
+         enforcement_clean)
+
+
+contingency_table_test <- table(quali_variables$governance_type_design_clean, quali_variables$decision_making_clean)
+chisq_test_exp <- chisq.test(contingency_table_test, simulate.p.value = TRUE)
+chisq_test_exp
+
+
+
+chi_squared_results <- list()
+
+categorical_pairs <- combn(names(quali_variables), 2, simplify = FALSE)
+
+
+
+for(pair in categorical_pairs) {
+  var1 <- pair[1]
+  var2 <- pair[2]
+  
+  # perform chi_squared test
+  chisq_test <- chisq.test(table(quali_variables[[var1]], quali_variables[[var2]]))
+  
+  chi_squared_results[[paste(var1, var2, sep = "_vs_")]] <- chisq_test$p.value
+}
+
+chi_squared_results
+
 
 # Perform factor analysis of mixed data
 
 design_famd <- FAMD(data_famd, sup.var = 1:4, graph = FALSE, ncp = 10)
 
-eig_val <- get_eigenvalue(design_famd)
+# screeplots of eigenvalues
+eig_values <- design_famd$eig[,1]
+dimensions <- seq_along(eig_values)
+scree_data <- data.frame(Dimension = dimensions, Eigenvalue = eig_values)
 
-fviz_famd_var(design_famd, repel = TRUE)
+ggplot(scree_data, aes(x = Dimension, y = Eigenvalue)) +
+  geom_line() +
+  geom_hline(yintercept = mean(scree_data$Eigenvalue))+
+  geom_point() +
+  theme_minimal()
+
+
 
 # screeplots of the two dimensions
 fviz_contrib(design_famd, "var", axes = 1)
