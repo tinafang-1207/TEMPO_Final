@@ -32,7 +32,7 @@ empirical_clean <- empirical %>%
          size_bin = size_of_closure_clean,
          length_closed_stan_years = length_of_time_closed_range_standardized_to_years,
          length_closed_bin = length_close_clean,
-         length_open_stan_days = length_of_time_open_range_standardized_to_days,
+         length_open_stan_years = length_of_time_open_range_standardized_to_years,
          length_open_bin = length_open_clean
          ) %>%
   # keep only the cleaned column (remove the original quote column)
@@ -58,7 +58,7 @@ empirical_clean <- empirical %>%
          size_bin,
          length_closed_stan_years,
          length_closed_bin,
-         length_open_stan_days,
+         length_open_stan_years,
          length_open_bin,
          percentage_fishing_ground_closed_clean,
          number_of_species_clean,
@@ -198,6 +198,15 @@ country_fill <- c("Yes" = "#7fc97f", "No" = "grey")
 
 paper_fill <- c("percentage_empirical" = "#f0027f", "percentage_modeling" = "#386cb0")
 
+# define the category labeller for scattered pie chart
+
+radius_labeller <- function(radius, label){
+  
+  label = (radius/3)*10
+  
+  return (label)
+}
+
 worldplot <- ggplot(world_final, aes(long, lat, fill = has_temporary, group = group)) +
   geom_map(map = world_final, aes(map_id = region), color = "grey", linewidth = 0.3, show.legend = F) +
   scale_fill_manual(name = "Has temporary", values = country_fill) +
@@ -207,6 +216,11 @@ worldplot <- ggplot(world_final, aes(long, lat, fill = has_temporary, group = gr
                   cols = c("percentage_empirical", "percentage_modeling"),
                   color = "black",
                   linewidth = 0.3)+
+  geom_scatterpie_legend(r = total_cases_percentage$radius,
+                         x = -170,
+                         y = -40,
+                         n = 4,
+                         labeller = radius_labeller) +
   scale_fill_manual(name = "Case type", values = paper_fill, labels = c("percentage_empirical" = "Empirical", "percentage_modeling" = "Modeling")) +
   coord_fixed(1.3) +
   theme_bw() + base_theme + theme(legend.position = "bottom")

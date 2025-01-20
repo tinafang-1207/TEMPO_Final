@@ -111,11 +111,12 @@ data_famd <- empirical_clean %>%
   mutate(size_stan_ha = as.numeric(gsub(",", "", size_stan_ha)),
          length_closed_stan_years = as.numeric(gsub(",","", length_closed_stan_years)),
          length_open_stan_years = as.numeric(gsub(",","", length_open_stan_years))) %>%
-  na.omit() %>%
   mutate(size_stan_log = log(size_stan_ha+1),
          length_closed_stan_years_log = log(length_closed_stan_years+1),
-         length_open_stan_years_log = log(length_open_stan_years+1))
-  # select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years)
+         length_open_stan_years_log = log(length_open_stan_years+1)) %>%
+  select(-size_stan_ha, -length_closed_stan_years, -length_open_stan_years) %>%
+  na.omit()
+
 #########################################################################################
 # Test data for the assumption of colliniarity
 
@@ -167,7 +168,7 @@ for(pair in categorical_pairs) {
 }
 
 chi_squared_results
-
+###############################################################################
 
 # Perform factor analysis of mixed data
 
@@ -199,34 +200,54 @@ g_indv <- fviz_famd_ind(design_famd, col.ind = "cos2", gradient.cols = c("#00afb
 
 g_indv
 
-# fviz_mfa_ind(design_famd, 
-#              habillage = "governance_type_design_clean",
-#              palette = c("#00AFBB", "#E7B800", "#FC4E07"), 
-#              addEllipse = TRUE, ellipse.type = "confidence",
-#              repel = TRUE)
 
-# plot the individual clusters grouped by supplementary variable
-# ind <- get_famd_ind(design_famd)
-# 
-# ind_coord <- as.data.frame(ind[["coord"]]) %>%
-#   select(-Dim.3, -Dim.4, -Dim.5) %>%
-#   rename(coord_dim1 = Dim.1,
-#          coord_dim2 = Dim.2)
-# 
-# ind_cos2 <- as.data.frame(ind[["cos2"]]) %>%
-#   select(-Dim.3, -Dim.4, -Dim.5) %>%
-#   rename(cos_dim1 = Dim.1,
-#          cos_dim2 = Dim.2)
-# 
-# ind_contrib <- as.data.frame(ind[["contrib"]]) %>%
-#   select(-Dim.3, -Dim.4, -Dim.5) %>%
-#   rename(contrib_dim1 = Dim.1,
-#          contrib_dim2 = Dim.2)
-# 
-# ind_total <- cbind(ind_coord, ind_cos2, ind_contrib) %>%
-#   mutate(case_num = rownames(ind_total)) %>%
-#   select(case_num, everything()) %>%
-#   cbind(data_famd)
+####################################################################
+# Draw ellipse around the scattered point
+
+ind <- design_famd$ind
+
+ind_coord <- as.data.frame(ind[["coord"]]) %>%
+  select(-Dim.3, -Dim.4, -Dim.5, -Dim.6, -Dim.7, -Dim.8, -Dim.9, -Dim.10) %>%
+  rename(coord_dim1 = Dim.1,
+         coord_dim2 = Dim.2)
+
+ind_cos2 <- as.data.frame(ind[["cos2"]]) %>%
+  select(-Dim.3, -Dim.4, -Dim.5,-Dim.6, -Dim.7, -Dim.8, -Dim.9, -Dim.10) %>%
+  rename(cos_dim1 = Dim.1,
+         cos_dim2 = Dim.2)
+
+ind_contrib <- as.data.frame(ind[["contrib"]]) %>%
+  select(-Dim.3, -Dim.4, -Dim.5, -Dim.6, -Dim.7, -Dim.8, -Dim.9, -Dim.10) %>%
+  rename(contrib_dim1 = Dim.1,
+         contrib_dim2 = Dim.2)
+
+ind_total <- cbind(ind_coord, ind_cos2, ind_contrib) %>%
+  mutate(cluster = case_when(
+    rownames(ind_total) %in% c(27,28,12,14,13,15,3,4,2,5,25,7,11,6,9,10,8,20,21)~"A",
+    rownames(ind_total) %in% c(16,38,37,39,18,36,1,17,24,19,22)~"B",
+    rownames(ind_total) %in% c(29,32,33,30,31,34,35)~"C",
+    rownames(ind_total) %in% c(40,50,23,41,44,42,43)~"D",
+    rownames(ind_total) %in% c(45,46)~"E",
+    rownames(ind_total) %in% c(49,47,48)~"F"
+  ))
+
+# make plot to show the individual group in barplot
+point_color <- c("A"="#00468b", "B"="#ed0000", "C"="#42b540", "D"="#0099b4", "E"="#925e9f", "F"="#fdaf91")
+
+ind_barplot <- ggplot(data = ind_total, aes(x = coord_dim1, y = coord_dim2, color = cluster)) + 
+  geom_point(size = 0.8) +
+  scale_color_manual(name = "Cluster", values = point_color) +
+  geom_hline(yintercept = 0, color = "black", linetype = "dashed") +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
+  labs(x = "Dim 1", y = "Dim 2") +
+  theme_bw() + theme(legend.position = "none")
+
+ind_barplot
+
+
+
+
+
 # 
 # # color by type of closure
 # ggplot(data = ind_total, aes(x = coord_dim1, y = coord_dim2, color = short_type_of_closure_clean)) +
@@ -281,7 +302,7 @@ ggsave(g1, filename = file.path(plotdir, "Figx_dendrogram_cluster.png"), width =
 
 ggsave(g2, filename = file.path(plotdir, "Figx_scatter_cluster.png"), width = 4, height = 3, units = "in", dpi = 600)
 
-ggsave(g_indv, filename = file.path(plotdir, "Figx_individual_cluster.png"), width = 5, height = 4, units = "in", dpi = 600 )
+ggsave(ind_barplot, filename = file.path(plotdir, "Figx_individual_cluster.png"), width = 5, height = 3, units = "in", dpi = 600 )
 
 ######################################################################
 
