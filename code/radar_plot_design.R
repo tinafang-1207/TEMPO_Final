@@ -84,7 +84,6 @@ empirical_group <- empirical_clean %>%
 ##############################################################################
 
 # Radar plot of the context variable
-
 empirical_radar <- empirical_group %>%
   select(types_of_gear_used_clean, 
          actors_type_governance_clean, 
@@ -137,7 +136,7 @@ gear_percentage <- gear_summarize %>%
          scallop_percentage = round((`Scallop dredges`/case_total)*100)) %>%
   select(-Gleaning, -`Hook and line fishing`, -Nets, -Spears, -Diving, -Traps, -Longline, -Seiners, -Trawlers, -`Scallop dredges`, -case_total) %>%
   rename(Gleaning = gleaning_percentage,
-         `Hook and line fishing` = hook_percentage,
+         `Hook and line` = hook_percentage,
          Nets = nets_percentage,
          Spears = spears_percentage,
          Diving = diving_percentage,
@@ -153,15 +152,15 @@ gear <- ggradar(
   values.radar = c("0", "50%", "100%"),
   grid.min = 0, grid.mid = 50, grid.max = 100,
   # Polygons
-  group.line.width = 0.5, 
-  group.point.size = 1.5,
+  group.line.width = 0.4, 
+  group.point.size = 0.8,
   group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
   # Background and grid lines
   background.circle.colour = "gray",
   gridline.mid.colour = "skyblue",
   # Label size
-  axis.label.size = 3,
-  grid.label.size = 5,
+  axis.label.size = 2,
+  grid.label.size = 3,
   # legend
   legend.position = "none"
 ) +
@@ -221,22 +220,22 @@ actor_percentage <- actor_summarize %>%
          Locals = locals_percentage,
          NGO = ngo_percentage,
          Others = others_percentage,
-         `Fishing industry` = industry_percentage)
+         `Industry` = industry_percentage)
 
 actor <- ggradar(
   actor_percentage, 
   values.radar = c("0", "50%", "100%"),
   grid.min = 0, grid.mid = 50, grid.max = 100,
   # Polygons
-  group.line.width = 0.5, 
-  group.point.size = 1.5,
+  group.line.width = 0.4, 
+  group.point.size = 0.8,
   group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
   # Background and grid lines
   background.circle.colour = "gray",
   gridline.mid.colour = "skyblue",
   # Label size
-  axis.label.size = 3,
-  grid.label.size = 5,
+  axis.label.size = 2,
+  grid.label.size = 3,
   # legend
   legend.position = "none"
 ) +
@@ -253,8 +252,7 @@ actor
 ########################################################################
 # Motivation
 
-motivation <- empirical_group %>%
-  filter(!is.na(cluster)) %>%
+motivation <- empirical_radar %>%
   select(motivations_clean, cluster) %>%
   mutate(motivations_clean = ifelse(motivations_clean == "Unknown", "Social", motivations_clean)) %>%
   separate(motivations_clean, into = c("moti_first", "moti_second"), sep = ";", fill = "right") %>%
@@ -268,7 +266,7 @@ motivation_summarize <- motivation %>%
   summarise(motivation_count = n(), .groups = "drop") %>%
   pivot_wider(names_from = motivation, values_from = motivation_count, values_fill = list(motivation_count = 0)) %>%
   select(-"NA") %>%
-  mutate(case_total = rowSums(across("Ecosystem/Conservation":"Social")))
+  mutate(case_total = rowSums(across("Ecosystem/Conservation":"Governance")))
 
 # calculate percentage
 motivation_percent <- motivation_summarize %>%
@@ -284,10 +282,10 @@ motivation_percent <- motivation_summarize %>%
          -`Social`,
          -`case_total`) %>%
   rename(`Ecosystem/Conservation` = eco_percentage,
-         `Management/Income` = fish_percentage,
-         Governance = gov_percentage,
-         Social = social_percentage,
-         Others = other_percentage)
+         `Management` = fish_percentage,
+          Governance = gov_percentage,
+          Social = social_percentage,
+          Others = other_percentage)
 
 
 motivation <- ggradar(
@@ -295,8 +293,8 @@ motivation <- ggradar(
   values.radar = c("0", "50%", "100%"),
   grid.min = 0, grid.mid = 50, grid.max = 100,
   # Polygons
-  group.line.width = 0.5, 
-  group.point.size = 1.5,
+  group.line.width = 0.4, 
+  group.point.size = 0.8,
   group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
   # Background and grid lines
   background.circle.colour = "gray",
@@ -305,7 +303,42 @@ motivation <- ggradar(
   axis.label.size = 3,
   grid.label.size = 5,
   # legend
-  legend.position = "bottom"
+  legend.title = "Cluster(Radar panel)"
+) +
+  labs(title = "Motivation") +
+  theme(plot.title.position = "panel",
+        plot.title = element_text(
+          size = 10,
+          face = "bold"),
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 6),
+        legend.key.size = unit(0.3, "cm")) +
+  guides(fill = guide_legend(nrow = 6))
+
+
+motivation
+
+radar_legend <- ggpubr::get_legend(motivation)
+
+ggpubr::as_ggplot(radar_legend)
+
+
+moti_no_legend <- ggradar(
+  motivation_percent, 
+  values.radar = c("0", "50%", "100%"),
+  grid.min = 0, grid.mid = 50, grid.max = 100,
+  # Polygons
+  group.line.width = 0.4, 
+  group.point.size = 0.8,
+  group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
+  # Background and grid lines
+  background.circle.colour = "gray",
+  gridline.mid.colour = "skyblue",
+  # Label size
+  axis.label.size = 2,
+  grid.label.size = 3,
+  # legend
+  legend.position = "none"
 ) +
   labs(title = "Motivation") +
   theme(plot.title.position = "panel",
@@ -314,10 +347,112 @@ motivation <- ggradar(
           face = "bold"
         ))
 
-ggsave(motivation, filename = file.path(plotdir, "Figx_motivation.png"), width = 5, height = 4, units = "in", dpi = 600 )
+moti_no_legend
+
+###################################################################
+# Traditional history
+
+history_summarize <- empirical_radar %>%
+  select(traditional_history_clean, cluster) %>%
+  rename(history = traditional_history_clean) %>%
+  mutate(history = ifelse(history == "Unknown", NA, history)) %>%
+  mutate(history = ifelse(history == "No ", "No", history)) %>%
+  na.omit() %>%
+  group_by(cluster, history) %>%
+  summarize(history_count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = history, values_from = history_count, values_fill = list(history_count = 0)) %>%
+  mutate(case_total = rowSums(across("No":"Yes")))
+
+history_percentage <- history_summarize %>%
+  mutate(no_percentage = round((No/case_total)*100),
+         yes_percentage = round((Yes/case_total)*100)) %>%
+  select(-No, -Yes, -case_total) %>%
+  rename(Yes = yes_percentage,
+         No = no_percentage) %>%
+  pivot_longer(cols = c(No, Yes), names_to = "history_type", values_to = "percentage") %>%
+  mutate(variable_type = "Traditional history") %>%
+  mutate(history_type = factor(history_type, levels = c("Yes", "No")))
 
 
+#set theme for bar plot
+barplot_theme <- theme(axis.text=element_text(size=8),
+                       axis.title=element_text(size=9),
+                       legend.text=element_text(size=8),
+                       legend.title=element_text(size=9),
+                       strip.text=element_text(size=8),
+                       plot.title=element_text(size=9),
+                       # Gridlines
+                       panel.grid.major = element_blank(), 
+                       panel.grid.minor = element_blank(),
+                       panel.background = element_blank(),
+                       axis.line = element_line(colour = "black"),
+                       # Legend
+                       legend.key = element_rect(fill = NA, color=NA),
+                       legend.background = element_rect(fill=alpha('blue', 0)),
+                       strip.background = element_rect(color = "black",fill = "gray90"))
 
+history_fill <- c("No" = "#ed0000", "Yes" = "#42b540")
+
+history <-  ggplot(data = history_percentage, aes(x= cluster, y = percentage, fill = history_type)) +
+  facet_grid(variable_type~., space = "free_y", scales = "free_y") +
+  geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
+  scale_fill_manual(name = "Categories", values = history_fill) +
+  scale_y_continuous(lim = c(0, 112), breaks = seq(0, 100, 50)) +
+  labs(y = "Percentage") +
+  theme_bw() + barplot_theme + guides(fill = guide_legend(nrow = 1)) +
+  theme(axis.title.x = element_blank(),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = c(0.25, 0.93))
+
+history
+
+####################################################################
+# TURF
+
+turf_summarize <- empirical_radar %>%
+  select(turf_clean, cluster) %>%
+  rename(turf = turf_clean) %>%
+  mutate(turf = ifelse(turf == "Unknown", NA, turf)) %>%
+  na.omit() %>%
+  group_by(cluster, turf) %>%
+  summarize(turf_count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = turf, values_from = turf_count, values_fill = list(turf_count = 0)) %>%
+  mutate(case_total = rowSums(across("No":"Yes")))
+
+turf_percentage <- turf_summarize %>%
+  mutate(no_percentage = round((No/case_total)*100),
+         yes_percentage = round((Yes/case_total)*100)) %>%
+  select(-No, -Yes, -case_total) %>%
+  rename(Yes = yes_percentage,
+         No = no_percentage) %>%
+  pivot_longer(cols = c(No, Yes), names_to = "turf_type", values_to = "percentage") %>%
+  mutate(variable_type = "TURF") %>%
+  mutate(turf_type = factor(turf_type, levels = c("Yes", "No")))
+
+turf_fill <- c("No" = "#ed0000", "Yes" = "#42b540")
+
+turf <-  ggplot(data = turf_percentage, aes(x= cluster, y = percentage, fill = turf_type)) +
+  facet_grid(variable_type~., space = "free_y", scales = "free_y") +
+  geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
+  scale_fill_manual(name = "Categories", values = history_fill) +
+  scale_y_continuous(lim = c(0, 112), breaks = seq(0, 100, 50)) +
+  theme_bw() + barplot_theme + guides(fill = guide_legend(nrow = 1)) +
+  theme(axis.title.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
+        legend.key.size = unit(0.5, "cm"),
+        legend.position = c(0.25, 0.93))
+
+turf
+
+#######################################################################
+
+g_context <- gridExtra::grid.arrange(gear,actor,moti_no_legend,history,turf, radar_legend, ncol = 3, widths = c(1/3, 1/3, 1/3), heights = c(0.5, 0.5))
+
+ggsave(g_context, filename = file.path(plotdir, "Figx_context_radar.png"), width = 9, height = 6.5, units = "in", dpi = 600)
 
 
 
