@@ -64,13 +64,15 @@ empirical_clean <- empirical %>%
 # Assign the cluster to observations based on the cluster analysis
 empirical_group <- empirical_clean %>%
   mutate(cluster = case_when(
-    row_number() %in% c(23,40,41,50,44,42,43)~"cluster 1",
-    row_number() %in% c(16,22,1,38,37,39,18,36,17,24)~"cluster 2",
-    row_number() %in% c(29,34,35)~"cluster 3",
-    row_number() %in% c(12,28,8,20,21)~"cluster 4",
-    row_number() %in% c(46,45,49,47,48)~"cluster 5",
-    row_number() %in% c(25,32,33,30,31,14,27,13,15,3,4,2,5,9,19,6,10,7,11)~"cluster 6"
-  ))
+    row_number() %in% c(27,28,12,14,13,15,3,4,2,5,25,7,11,6,9,10,8,20,21)~"A",
+    row_number() %in% c(16,38,37,39,18,36,1,17,24,19,22)~"B",
+    row_number() %in% c(29,32,33,30,31,34,35)~"C",
+    row_number() %in% c(40,50,23,41,44,42,43)~"D",
+    row_number() %in% c(45,46)~"E",
+    row_number() %in% c(47,48,49)~"F"
+  )) %>%
+  filter(!is.na(cluster))
+
 
 # Cluster 1 Top-down dynamic closures
 # Cluster 2 medium term-closure (<5), short opening time (in days)
@@ -80,7 +82,176 @@ empirical_group <- empirical_clean %>%
 # Cluster 6 annual closure (<1 or around 1 year), relative long opening (days-weeks-month)
 
 ##############################################################################
-#Do an experimental plot of motivation
+
+# Radar plot of the context variable
+
+empirical_radar <- empirical_group %>%
+  select(types_of_gear_used_clean, 
+         actors_type_governance_clean, 
+         traditional_history_clean, 
+         start_date_clean, 
+         turf_clean,
+         motivations_clean,
+         cluster)
+
+##############################################################################
+
+# Type of gear used
+gear <- empirical_radar %>%
+  select(types_of_gear_used_clean, cluster) %>%
+  rename(gear = types_of_gear_used_clean) %>%
+  mutate(gear = ifelse(gear == "Unknown", NA, gear)) %>%
+  mutate(gear = ifelse(gear == "Spears; Hook and line; Nets", "Spears; Hook and line fishing; Nets", gear)) %>%
+  filter(!is.na(gear)) %>%
+  separate(gear, into = c("gear_one", "gear_two", "gear_three", "gear_four"), sep = ";") %>%
+  #clean the separated groups
+  mutate(gear_two = case_when(gear_two == " Hook and line fishing"~"Hook and line fishing",
+                              gear_two == " Nets"~"Nets", 
+                              gear_two ==" Gleaning"~"Gleaning",
+                              gear_two == " Seiners"~"Seiners")) %>%
+  mutate(gear_three = case_when(gear_three == " Nets"~"Nets",
+                                gear_three == " Gleaning"~"Gleaning",
+                                gear_three == " Diving"~"Diving")) %>%
+  mutate(gear_four = case_when(gear_four == " Gleaning"~"Gleaning"))
+
+
+gear_summarize <- gear %>%
+  pivot_longer(cols = c(gear_one, gear_two, gear_three, gear_four), names_to = "gear_type", values_to = "gear") %>%
+  group_by(cluster, gear) %>%
+  summarize(gear_count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = gear, values_from = gear_count,values_fill = list(gear_count = 0)) %>%
+  select(-"NA") %>%
+  mutate(case_total = rowSums(across("Gleaning":"Scallop dredges")))
+  
+
+gear_percentage <- gear_summarize %>%
+  mutate(gleaning_percentage = round((Gleaning/case_total)*100),
+         hook_percentage = round((`Hook and line fishing`/case_total)*100),
+         nets_percentage = round((Nets/case_total)*100),
+         spears_percentage = round((Spears/case_total)*100),
+         diving_percentage = round((Diving/case_total)*100),
+         traps_percentage = round((Traps/case_total)*100),
+         longline_percentage = round((Longline/case_total)*100),
+         seiners_percentage = round((Seiners/case_total)*100),
+         trawlers_percentage = round((Trawlers/case_total)*100),
+         scallop_percentage = round((`Scallop dredges`/case_total)*100)) %>%
+  select(-Gleaning, -`Hook and line fishing`, -Nets, -Spears, -Diving, -Traps, -Longline, -Seiners, -Trawlers, -`Scallop dredges`, -case_total) %>%
+  rename(Gleaning = gleaning_percentage,
+         `Hook and line fishing` = hook_percentage,
+         Nets = nets_percentage,
+         Spears = spears_percentage,
+         Diving = diving_percentage,
+         Traps = traps_percentage,
+         Longline = longline_percentage,
+         Seiners = seiners_percentage,
+         Trawlers = trawlers_percentage,
+         `Scallop dredges` = scallop_percentage)
+
+
+gear <- ggradar(
+  gear_percentage, 
+  values.radar = c("0", "50%", "100%"),
+  grid.min = 0, grid.mid = 50, grid.max = 100,
+  # Polygons
+  group.line.width = 0.5, 
+  group.point.size = 1.5,
+  group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
+  # Background and grid lines
+  background.circle.colour = "gray",
+  gridline.mid.colour = "skyblue",
+  # Label size
+  axis.label.size = 3,
+  grid.label.size = 5,
+  # legend
+  legend.position = "none"
+) +
+  labs(title = "Gear") +
+  theme(plot.title.position = "panel",
+        plot.title = element_text(
+          size = 10,
+          face = "bold"
+        ))
+
+gear
+
+#######################################################################
+
+#Actors
+actors <- empirical_radar %>%
+  select(actors_type_governance_clean, cluster) %>%
+  rename(actors = actors_type_governance_clean) %>%
+  mutate(actors = case_when(actors == "Fishing industry; Others(Academia)"~"Fishing industry; Others",
+                            actors == "Fishing industry; Government; Others(Academia)"~"Fishing industry; Government; Others",
+                            .default = actors)) %>%
+  separate(actors, into = c("actor_one", "actor_two", "actor_three", "actor_four"), sep = ";") %>%
+  mutate(actor_two = case_when(actor_two == " Locals"~"Locals",
+                              actor_two == " Government"~"Government", 
+                              actor_two ==" NGO"~"NGO",
+                              actor_two == " Others"~"Others")) %>%
+  mutate(actor_three = case_when(actor_three == " Government"~"Government",
+                                actor_three == " NGO"~"NGO",
+                                actor_three == " Others"~"Others")) %>%
+  mutate(actor_four = case_when(actor_four == " Others"~"Others"))
+  
+actor_summarize <- actors %>%
+  pivot_longer(cols = c(actor_one, actor_two, actor_three, actor_four), names_to = "actor_type", values_to = "actor") %>%
+  group_by(cluster, actor) %>%
+  summarise(actor_count = n(), .groups = "drop") %>%
+  pivot_wider(names_from = actor, values_from = actor_count, values_fill = list(actor_count = 0)) %>%
+  select(-"NA") %>%
+  mutate(case_total = rowSums(across("Community leaders":"Fishing industry")))
+
+
+actor_percentage <- actor_summarize %>%
+  mutate(community_percentage = round((`Community leaders`/case_total)*100),
+         government_percentage = round((Government/case_total)*100),
+         locals_percentage = round((Locals/case_total)*100),
+         ngo_percentage = round((NGO/case_total)*100),
+         others_percentage = round((Others/case_total)*100),
+         industry_percentage = round((`Fishing industry`/case_total)*100)) %>%
+  select(-`Community leaders`,
+         -`Government`,
+         -`Locals`,
+         -`NGO`,
+         -`Others`,
+         -`Fishing industry`,
+         -`case_total`) %>%
+  rename(`Community leaders` = community_percentage,
+         `Government` = government_percentage,
+         Locals = locals_percentage,
+         NGO = ngo_percentage,
+         Others = others_percentage,
+         `Fishing industry` = industry_percentage)
+
+actor <- ggradar(
+  actor_percentage, 
+  values.radar = c("0", "50%", "100%"),
+  grid.min = 0, grid.mid = 50, grid.max = 100,
+  # Polygons
+  group.line.width = 0.5, 
+  group.point.size = 1.5,
+  group.colours = c("#00468b", "#ed0000", "#42b540", "#0099b4", "#925e9f", "#fdaf91"),
+  # Background and grid lines
+  background.circle.colour = "gray",
+  gridline.mid.colour = "skyblue",
+  # Label size
+  axis.label.size = 3,
+  grid.label.size = 5,
+  # legend
+  legend.position = "none"
+) +
+  labs(title = "Actor") +
+  theme(plot.title.position = "panel",
+        plot.title = element_text(
+          size = 10,
+          face = "bold"
+        ))
+
+actor
+  
+  
+########################################################################
+# Motivation
 
 motivation <- empirical_group %>%
   filter(!is.na(cluster)) %>%
