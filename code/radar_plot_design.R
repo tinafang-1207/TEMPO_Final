@@ -136,15 +136,15 @@ gear_percentage <- gear_summarize %>%
          scallop_percentage = round((`Scallop dredges`/case_total)*100)) %>%
   select(-Gleaning, -`Hook and line fishing`, -Nets, -Spears, -Diving, -Traps, -Longline, -Seiners, -Trawlers, -`Scallop dredges`, -case_total) %>%
   rename(Gleaning = gleaning_percentage,
-         `Hook and line` = hook_percentage,
+         `Hook \n and line` = hook_percentage,
          Nets = nets_percentage,
-         Spears = spears_percentage,
+         Spear = spears_percentage,
          Diving = diving_percentage,
-         Traps = traps_percentage,
+         Trap = traps_percentage,
          Longline = longline_percentage,
-         Seiners = seiners_percentage,
-         Trawlers = trawlers_percentage,
-         `Scallop dredges` = scallop_percentage)
+         Seiner = seiners_percentage,
+         Trawler = trawlers_percentage,
+         `Scallop \ndredges` = scallop_percentage)
 
 
 gear <- ggradar(
@@ -159,8 +159,8 @@ gear <- ggradar(
   background.circle.colour = "gray",
   gridline.mid.colour = "skyblue",
   # Label size
-  axis.label.size = 2,
-  grid.label.size = 3,
+  axis.label.size = 4,
+  grid.label.size = 4,
   # legend
   legend.position = "none"
 ) +
@@ -215,12 +215,12 @@ actor_percentage <- actor_summarize %>%
          -`Others`,
          -`Fishing industry`,
          -`case_total`) %>%
-  rename(`Community leaders` = community_percentage,
-         `Government` = government_percentage,
+  rename(`Comm lead` = community_percentage,
+         `Gov` = government_percentage,
          Locals = locals_percentage,
          NGO = ngo_percentage,
          Others = others_percentage,
-         `Industry` = industry_percentage)
+         `Ind` = industry_percentage)
 
 actor <- ggradar(
   actor_percentage, 
@@ -234,8 +234,8 @@ actor <- ggradar(
   background.circle.colour = "gray",
   gridline.mid.colour = "skyblue",
   # Label size
-  axis.label.size = 2,
-  grid.label.size = 3,
+  axis.label.size = 4,
+  grid.label.size = 4,
   # legend
   legend.position = "none"
 ) +
@@ -281,10 +281,10 @@ motivation_percent <- motivation_summarize %>%
          -`Others`,
          -`Social`,
          -`case_total`) %>%
-  rename(`Ecosystem/Conservation` = eco_percentage,
-         `Management` = fish_percentage,
-          Governance = gov_percentage,
-          Social = social_percentage,
+  rename(`Conserv` = eco_percentage,
+         `Fish \nmgmt` = fish_percentage,
+          Gov = gov_percentage,
+          Soc = social_percentage,
           Others = other_percentage)
 
 
@@ -310,8 +310,8 @@ motivation <- ggradar(
         plot.title = element_text(
           size = 10,
           face = "bold"),
-        legend.text = element_text(size = 6),
-        legend.title = element_text(size = 6),
+        legend.text = element_text(size = 8),
+        legend.title = element_text(size = 8),
         legend.key.size = unit(0.3, "cm")) +
   guides(fill = guide_legend(nrow = 6))
 
@@ -335,8 +335,8 @@ moti_no_legend <- ggradar(
   background.circle.colour = "gray",
   gridline.mid.colour = "skyblue",
   # Label size
-  axis.label.size = 2,
-  grid.label.size = 3,
+  axis.label.size = 4,
+  grid.label.size = 4,
   # legend
   legend.position = "none"
 ) +
@@ -396,7 +396,7 @@ history_fill <- c("No" = "#ed0000", "Yes" = "#42b540")
 history <-  ggplot(data = history_percentage, aes(x= cluster, y = percentage, fill = history_type)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  scale_fill_manual(name = "Categories", values = history_fill) +
+  scale_fill_manual(name = "", values = history_fill) +
   scale_y_continuous(lim = c(0, 112), breaks = seq(0, 100, 50)) +
   labs(y = "Percentage") +
   theme_bw() + barplot_theme + guides(fill = guide_legend(nrow = 1)) +
@@ -436,7 +436,7 @@ turf_fill <- c("No" = "#ed0000", "Yes" = "#42b540")
 turf <-  ggplot(data = turf_percentage, aes(x= cluster, y = percentage, fill = turf_type)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
-  scale_fill_manual(name = "Categories", values = history_fill) +
+  scale_fill_manual(name = "", values = history_fill) +
   scale_y_continuous(lim = c(0, 112), breaks = seq(0, 100, 50)) +
   theme_bw() + barplot_theme + guides(fill = guide_legend(nrow = 1)) +
   theme(axis.title.x = element_blank(),
@@ -452,7 +452,7 @@ turf
 
 g_context <- gridExtra::grid.arrange(gear,actor,moti_no_legend,history,turf, radar_legend, ncol = 3, widths = c(1/3, 1/3, 1/3), heights = c(0.5, 0.5))
 
-ggsave(g_context, filename = file.path(plotdir, "Figx_context_radar.png"), width = 9, height = 6.5, units = "in", dpi = 600)
+ggsave(g_context, filename = file.path(plotdir, "Figx_context_radar.png"), width = 9.8, height = 7, units = "in", dpi = 600)
 
 
 

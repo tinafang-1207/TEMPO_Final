@@ -126,7 +126,11 @@ empirical_quali_govern <- empirical_group %>%
   mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Governance type") %>%
   rename(variable_category = governance_type_design_clean) %>%
-  select(cluster, variable_type, variable_category, everything())
+  select(cluster, variable_type, variable_category, everything()) %>%
+  # change the name of the variable category
+  mutate(variable_category = case_when(variable_category == "Co-management"~"Co-mgmt",
+                                       variable_category == "Bottom-up"~"Btm-up",
+                                       variable_category == "Top-down"~"Top-dwn"))
 
 
 # Decision making process
@@ -146,7 +150,13 @@ empirical_quali_decision <- empirical_group %>%
   mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Decision making type") %>%
   rename(variable_category = decision_making_clean) %>%
-  select(cluster, variable_type, variable_category, everything())
+  select(cluster, variable_type, variable_category, everything()) %>%
+  # change the name of the variable category
+  mutate(variable_category = case_when(variable_category == "Collaboration community-NGO"~"Collab comm-NGO",
+                                       variable_category == "Collaboration community-government"~"Collab comm-gov",
+                                       variable_category == "Community/village led"~"Comm led",
+                                       variable_category == "Government led"~"Gov led",
+                                       variable_category == "Others (Academia institution led)"~"Others"))
 
 # criteria of opening
 empirical_quali_open <- empirical_group %>%
@@ -165,7 +175,12 @@ empirical_quali_open <- empirical_group %>%
   mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Criteria of opening") %>%
   rename(variable_category = criteria_open_clean) %>%
-  select(cluster, variable_type, variable_category, everything())
+  select(cluster, variable_type, variable_category, everything()) %>%
+  # change the name of the variable category
+  mutate(variable_category = case_when(variable_category == "Ecosystem/Conservation"~"Conserv",
+                                       variable_category == "Social"~"Soc",
+                                       variable_category == "Governance"~"Gov",
+                                       variable_category == "Fisheries management/Fishing income"~"Fish mgmt"))
 
 # target species
 empirical_quali_species <- empirical_group %>%
@@ -184,7 +199,11 @@ empirical_quali_species <- empirical_group %>%
   mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Target species") %>%
   rename(variable_category = species_category_clean) %>%
-  select(cluster, variable_type, variable_category, everything())
+  select(cluster, variable_type, variable_category, everything()) %>%
+  # change the name of the variable category
+  mutate(variable_category = case_when(variable_category == "Invertebrates"~"Inv",
+                                       variable_category == "Marine mammals/sea turtles/seabirds"~"MM/ST/SB",
+                                       .default = variable_category))
 
 # enforcement type
 empirical_quali_enforcement <- empirical_group %>%
@@ -203,7 +222,13 @@ empirical_quali_enforcement <- empirical_group %>%
   mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Enforcement type") %>%
   rename(variable_category = enforcement_clean) %>%
-  select(cluster, variable_type, variable_category, everything())
+  select(cluster, variable_type, variable_category, everything()) %>%
+ # change the name of the variable category
+  mutate(variable_category = case_when(variable_category == "Collaboration community-NGO"~"Collab comm-NGO",
+                                                           variable_category == "Collaboration community-government"~"Collab comm-gov",
+                                                           variable_category == "Community/village led"~"Comm led",
+                                                           variable_category == "Government led"~"Gov led",
+                                                           variable_category == "No enforcement"~"No enf"))
 
 
 
@@ -233,7 +258,7 @@ color_scheme <- c("A" = "#00468b", "B" = "#ed0000", "C" = "#42b540", "D" = "#009
 g_quanti_final <- ggplot(empirical_quanti, aes(x = cluster, y = Value)) +
   geom_boxplot(outlier.shape = 21, linewidth = 0.2, outlier.size = 1, outlier.stroke = 0.2) +
   geom_jitter(aes(color = cluster), width = 0.1, alpha = 0.8) +
-  labs(x = "Cluster", y = "Value(in log scale)") +
+  labs(x = "Cluster", y = "Value") +
   scale_color_manual(name = "Cluster", values = color_scheme) +
   scale_y_continuous(trans = "log10", labels = scales::label_number()) +
   facet_wrap(.~Variable, scales = "free_y", strip.position = "right") +
@@ -263,7 +288,7 @@ barplot_theme <- theme(axis.text=element_text(size=8),
                        strip.background = element_rect(color = "black",fill = "gray90"))
 
 # governance
-govern_type = c("Co-management" = "#0099b4", "Bottom-up" = "#925e9f", "Top-down" = "#fdaf91")
+govern_type = c("Co-mgmt" = "#0099b4", "Btm-up" = "#925e9f", "Top-dwn" = "#fdaf91")
 
 g1 <- ggplot(data = empirical_quali_govern, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
@@ -273,14 +298,14 @@ g1 <- ggplot(data = empirical_quali_govern, aes(x=cluster, y = type_count, fill 
   scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
   theme_bw() + barplot_theme + theme(axis.title.x = element_blank(),
                                      legend.position = c(0.7, 0.75),
-                                     legend.key.size = unit(0.2, "cm"),
-                                     legend.text = element_text(size = 5),
-                                     legend.title = element_text(size = 5))
+                                     legend.key.size = unit(0.3, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 
 g1
 
 # decision making process
-decision_type = c("Collaboration community-government" = "#ed0000", "Collaboration community-NGO" = "#42b540", "Community/village led" = "#0099b4", "Government led" = "#925e9f", "Others (Academia institution led)" = "#fdaf91")
+decision_type = c("Collab comm-gov" = "#ed0000", "Collab comm-NGO" = "#42b540", "Comm led" = "#0099b4", "Gov led" = "#925e9f", "Others" = "#fdaf91")
 
 g2 <- ggplot(data = empirical_quali_decision, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
@@ -292,13 +317,13 @@ g2 <- ggplot(data = empirical_quali_decision, aes(x=cluster, y = type_count, fil
                                      axis.text.y = element_blank(),
                                      axis.ticks.y = element_blank(),
                                      legend.position = c(0.65, 0.75),
-                                     legend.key.size = unit(0.2, "cm"),
-                                     legend.text = element_text(size = 5),
-                                     legend.title = element_text(size = 5))
+                                     legend.key.size = unit(0.3, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 g2
 
 # criteria open
-open_type <- c("Social" = "#42b540", "Governance" = "#0099b4", "Fisheries management/Fishing income" = "#925e9f", "Ecosystem/Conservation" = "#fdaf91")
+open_type <- c("Soc" = "#42b540", "Gov" = "#0099b4", "Fish mgmt" = "#925e9f", "Conserv" = "#fdaf91")
 
 g3 <- ggplot(data = empirical_quali_open, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
@@ -311,14 +336,14 @@ g3 <- ggplot(data = empirical_quali_open, aes(x=cluster, y = type_count, fill = 
                                      axis.text.y = element_blank(),
                                      axis.ticks.y = element_blank(),
                                      legend.position = c(0.7, 0.75),
-                                     legend.key.size = unit(0.2, "cm"),
-                                     legend.text = element_text(size = 5),
-                                     legend.title = element_text(size = 5))
+                                     legend.key.size = unit(0.3, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 g3
 
 # target species
 
-species_type = c("Demersal fish" = "#ed0000", "Reef fish" = "#42b540", "Invertebrates" = "#0099b4", "Pelagic fish" = "#925e9f", "Marine mammals/sea turtles/seabirds" = "#fdaf91")
+species_type = c("Demersal fish" = "#ed0000", "Reef fish" = "#42b540", "Inv" = "#0099b4", "Pelagic fish" = "#925e9f", "MM/ST/SB" = "#fdaf91")
 
 g4 <- ggplot(data = empirical_quali_species, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
@@ -327,9 +352,9 @@ g4 <- ggplot(data = empirical_quali_species, aes(x=cluster, y = type_count, fill
   scale_fill_manual(name = "Categories", values = species_type) +
   scale_y_continuous(lim = c(0, 20), breaks = seq(0, 20, 5)) +
   theme_bw() + barplot_theme + theme(legend.position = c(0.65, 0.75),
-                                     legend.key.size = unit(0.2, "cm"),
-                                     legend.text = element_text(size = 5),
-                                     legend.title = element_text(size = 5))
+                                     legend.key.size = unit(0.3, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 
 
 g4
@@ -337,7 +362,7 @@ g4
 
 # enforcement
 
-enforcement_type = c("Collaboration community-government" = "#ed0000", "Collaboration community-NGO" = "#42b540", "Community/village led" = "#0099b4", "Government led" = "#925e9f", "No enforcement" = "#fdaf91")
+enforcement_type = c("Collab comm-gov" = "#ed0000", "Collab comm-NGO" = "#42b540", "Comm led" = "#0099b4", "Gov led" = "#925e9f", "No enf" = "#fdaf91")
 
 g5 <- ggplot(data = empirical_quali_enforcement, aes(x=cluster, y = type_count, fill = variable_category)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
@@ -349,9 +374,9 @@ g5 <- ggplot(data = empirical_quali_enforcement, aes(x=cluster, y = type_count, 
                                      axis.text.y = element_blank(),
                                      axis.ticks.y = element_blank(),
                                      legend.position = c(0.7, 0.75),
-                                     legend.key.size = unit(0.2, "cm"),
-                                     legend.text = element_text(size = 5),
-                                     legend.title = element_text(size = 5))
+                                     legend.key.size = unit(0.3, "cm"),
+                                     legend.text = element_text(size = 8),
+                                     legend.title = element_text(size = 8))
 
 g5
 
