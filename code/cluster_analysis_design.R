@@ -174,6 +174,8 @@ chi_squared_results
 
 design_famd <- FAMD(data_famd, sup.var = 1:4, graph = FALSE, ncp = 10)
 
+design_eig <- get_eigenvalue(design_famd)
+
 # screeplots of eigenvalues
 eig_values <- design_famd$eig[,1]
 dimensions <- seq_along(eig_values)
