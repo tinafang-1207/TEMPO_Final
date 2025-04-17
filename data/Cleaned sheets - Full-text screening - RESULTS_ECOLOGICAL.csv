@@ -1,0 +1,48 @@
+ref_id,paper_type,control_type,reported_target_species,reported_ecological_variable,reported_percentage_changes,reported_percentage_statistical_significance,Clusters,Notes
+"Cinner et al.,(2019)-PNG-Muluk",empirical,open access,reef fish,biomass,159%,yes,B,
+"Cinner et al.,(2019)-PNG-Muluk",empirical,open access,reef fish,abundance,2%,no,B,
+"Bartlett et al.,(2009)-VUT-North Efate",empirical,open access,reef fish,biomass,282%,yes,A,
+"Bartlett et al.,(2009)-VUT-North Efate",empirical,permanent reserves,reef fish,biomass,32%,no,A,
+"Bartlett et al.,(2009)-VUT-North Efate",empirical,open access,reef fish,abundance,35%,no,A,
+"Bartlett et al.,(2009)-VUT-North Efate",empirical,permanent reserves,reef fish,abundance,2%,no,A,
+Januchowski-Hartley (2014)-VUT-North Efate,empirical,open access,reef fish,catch-weight/size,45%,yes,A,
+"Jupiter et al.,(2009)-FJI-Kia",empirical,open access,reef fish,biomass,686%,yes,A,
+"Jupiter et al.,(2009)-FJI-Kia",empirical,open access,reef fish,abundance,46%,yes,A,
+"Goetze et al.,(2016)-FJI-Kiobo",empirical,open access,reef fish,biomass,220%,yes,A,
+"Goetze et al.,(2018)-FJI-Kiobo",empirical,open access,reef fish,catch-cpue,248%,not reported,A,*self-calculated
+"Goetze et al.,(2017)-FJI-Nakodu",empirical,open access,reef fish,biomass,194%,yes,A,
+"Goetze et al.,(2017)-FJI-Nakodu",empirical,open access,reef fish,abundance,136%,yes,A,
+"Goetze et al.,(2018)-FJI-Nakodu",empirical,open access,reef fish,catch-cpue,-78%,not reported,A,*self-calculated
+"Goetze et al.,(2017)-FJI-Tuatua",empirical,open access,reef fish,biomass,4%,no,A,
+"Goetze et al.,(2017)-FJI-Tuatua",empirical,open access,reef fish,abundance,0%,no,A,
+"Goetze et al.,(2017)-FJI-Nauouo",empirical,open access,reef fish,biomass,-51%,yes,A,
+"Goetze et al.,(2017)-FJI-Nauouo",empirical,open access,reef fish,abundance,28%,no,A,
+"Goetze et al.,(2018)-FJI-Nauouo",empirical,open access,reef fish,catch-cpue,-90%,not reported,A,*self-calculated
+"Goetze et al.,(2017)-FJI-Natokalau",empirical,open access,reef fish,biomass,1%,no,A,
+"Goetze et al.,(2017)-FJI-Natokalau",empirical,open access,reef fish,abundance,14%,no,A,
+Jupiter & Egili (2010)-FJI-Nakali,empirical,oprn access,reef fish,biomass,103%,yes,A,
+Cohen & Alexander (2013)-SLB-CC1&CC2,empirical,open access,reef fish,catch-weight/size,11.50%,no,A,
+Cohen & Alexander (2013)-SLB-CC1&CC2,empirical,open access,invertebrates,catch-weight/size,-21%,yes,A,
+Cohen & Alexander (2013)-SLB-CC1&CC2,empirical,open access,reef fish,catch-cpue,50%,yes,A,
+"Cinner et al.,(2005)-PNG-Ahus",empirical,open access,reef fish,biomass,60%,yes,B,
+"Oliver et al.,(2015)-MDG-Velondriake",empirical,open access,invertebrates,catch-total landings,443%,yes,C,"*landing difference is self-calculated between control and closure sites - only report cpue before and after the closure, not compare to the control"
+"Cinner et al.,(2006)-IDN-Kakarotan",empirical,open access,reef fish,biomass,37%,yes,B,
+"Cinner et al.,(2006)-IDN-Kakarotan",empirical,open access,reef fish,abundance ,2%,no,B,
+"Williams et al.,(2006)-USA-Hawaii",empirical,permanent reserves,reef fish,biomass,-51%,yes,C,
+"Quintana et al.,(2021)-MEX-Corredor",empirical,open access,reef fish,biomass,43%,not reported,C,
+"Quintana et al.,(2021)-MEX-Corredor",empirical,open access,reef fish,abundance,90%,not reported,C,
+"Benbow et al.,(2014)-MDG-Ankereo",empirical,open access,invertebrates,catch-weight/size,53%,yes,C,
+"Benbow et al.,(2014)-MDG-Nosy Masay",empirical,open access,invertebrates,catch-weight/size,21%,no,C,
+"Benbow et al.,(2014)-MDG-Ampisorogna",empirical,open access,invertebrates,catch-weight/size,34%,yes,C,
+"Benbow et al.,(2014)-MDG-Ankereo",empirical,open access,invertebrates,catch-cpue,14%,not reported,C,"*self-calculated, what about cpue through time"
+"Benbow et al.,(2014)-MDG-Nosy Masay",empirical,open access,invertebrates,catch-cpue,14%,not reported,C,"*self-calculated, what about cpue through time"
+"Benbow et al.,(2014)-MDG-Ampisorogna",empirical,open access,invertebrates,catch-cpue,7%,not reported,C,"*self-calculated, what about cpue through time"
+Jupiter & Egili (2010)-FJI-Yamotu Lase,empirical,open access,reef fish,biomass,210%,yes,A,
+"Silas et al.,(2022)-TZA-Songosongo",empirical,open access,invertebrates,catch-weight/size,88%,yes,C,
+"Silas et al.,(2022)-TZA-Songosongo",empirical,open access,invertebrates,catch-cpue,775%,yes,C,"*self-calculated, what about cpue through time"
+"Taylor et al.,(2004)-USA-Guam",Model,permanent reserves,reef fish,biomass,-30%,Not reported,NA,*spawner biomass
+"Game et al.,(2009)-Simulated",Model,permanent reserves,reef fish,biomass,25%,Not reported,NA,*Case study: optimum scenario under logistic recovery trajectory
+"Carvolho et al.,(2019)-Simulated",Model,permanent reserves,reef fish,catch-cpue,9%,Not reported,NA,*Case study: optimum scenario under 0% overfishing
+"Carvolho et al.,(2019)-Simulated",Model,permanent reserves,reef fish,abundance,0%,Not reported,NA,*Case study: optimum scenario under 0% overfishing
+"Carvolho et al.,(2019)-Simulated",Model,permanent reserves,reef fish,catch-total landings,0%,Not reported,NA,*Case study: optimum scenario under 0% overfishing
+Plagányi et al.(2015)-AUS-great-GBR,Model,open access,invertebrates,catch-total landings,3%,Not reported,NA,
