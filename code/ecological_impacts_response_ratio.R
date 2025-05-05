@@ -104,12 +104,15 @@ data_pct_cpue <- data_response_ratio_cpue %>%
 
 
 data_pct_all <- bind_rows(data_pct_non_cpue, data_pct_cpue) %>%
-  group_by(reported_ecological_variable) %>%
-  mutate(mean_pct_change = mean(pct_change)) %>%
-  mutate(reported_ecological_variable = fct_reorder(reported_ecological_variable, -mean_pct_change)) %>%
   mutate(reported_ecological_variable = case_when(reported_ecological_variable == "Biomass"~"Biomass\nN=8",
                                                   reported_ecological_variable == "Abundance"~"Abundance\nN=5",
-                                                  reported_ecological_variable == "Catch-CPUE"~"Catch-CPUE\nN=6"))
+                                                  reported_ecological_variable == "Catch-CPUE"~"Catch-CPUE\nN=7"))
+
+data_pct_mean_all <- data_pct_all %>%
+  group_by(reported_ecological_variable) %>%
+  summarize(mean_pct_change = mean(pct_change)) %>%
+  mutate(label = paste0(round(mean_pct_change,0), "%")) %>%
+  mutate(reported_ecological_variable = fct_reorder(reported_ecological_variable, -mean_pct_change))
 
 # data_pct_cpue_avg <- data_pct_cpue %>%
 #   group_by(reported_ecological_variable) %>%
@@ -191,9 +194,13 @@ g_case_cpue <- ggplot(data = data_response_ratio_cpue, aes(x = response_ratio_lo
 
 g_case_cpue
 
-g_pct_change <- ggplot(data_pct_all, aes(x = reorder(reported_ecological_variable, -mean_pct_change), y = pct_change)) +
-  stat_summary(fun = mean, geom = "bar", fill = "grey90", color = "black", width = 0.6, linewidth = 0.3) +
-  geom_point(aes(fill = clusters, shape = control_type), position = position_nudge(x = 0), size = 1.5) +
+# percent of change on response ratio
+
+g_pct_change <- ggplot() +
+  geom_col(data = data_pct_mean_all, aes(x = reported_ecological_variable, y = mean_pct_change), fill = "grey90", width = 0.6, color = "black", linewidth = 0.3) +
+  geom_point(data = data_pct_all, aes(x = reported_ecological_variable, y = pct_change, fill = clusters, shape = control_type),
+             position = position_nudge(x = 0),size = 1.5) +
+  geom_text(data = data_pct_mean_all, aes(x = reported_ecological_variable, y = mean_pct_change, label = label), hjust = -0.3, vjust = -0.5, fontface = "bold") +
   scale_shape_manual(name = "Type of control", values = c(21,23)) +
   scale_fill_manual(name = "Cluster", values = clusters) +
   labs(y = "Change in Biological Measures (%)") +
@@ -203,7 +210,7 @@ g_pct_change <- ggplot(data_pct_all, aes(x = reorder(reported_ecological_variabl
         legend.position = c(0.8, 0.8),
         legend.text = element_text(size = 6),
         legend.spacing = unit(0.1, "cm"),
-        legend.key.size = unit(0.3, "cm"))
+        legend.key.size = unit(0.3, "cm")) 
 
 g_pct_change
 
