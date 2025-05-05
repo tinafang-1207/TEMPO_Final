@@ -1,48 +1,61 @@
-ref_id,paper_type,control_type,reported_target_species,reported_ecological_variable,reported_percentage_changes,reported_percentage_statistical_significance,Clusters,Notes
-001-CIN-19-MUL,empirical,open access,reef fish,biomass,159%,yes,B,
-001-CIN-19-MUL,empirical,open access,reef fish,abundance,2%,no,B,
-013-BAR-09-NE,empirical,open access,reef fish,biomass,282%,yes,A,
-013-BAR-09-NE,empirical,permanent reserves,reef fish,biomass,32%,no,A,
-013-BAR-09-NE,empirical,open access,reef fish,abundance,35%,no,A,
-013-BAR-09-NE,empirical,permanent reserves,reef fish,abundance,2%,no,A,
-064-HAR-14-NE,empirical,open access,reef fish,catch-weight/size,45%,yes,A,
-009-JUP-12-KIA,empirical,open access,reef fish,biomass,686%,yes,A,
-009-JUP-12-KIA,empirical,open access,reef fish,abundance,46%,yes,A,
-045-GOE-16-KIO,empirical,open access,reef fish,biomass,220%,yes,A,
-022-GOE-18-KIO,empirical,open access,reef fish,catch-cpue,248%,not reported,A,*self-calculated
-025-GOE-17-NAK,empirical,open access,reef fish,biomass,194%,yes,A,
-025-GOE-17-NAK,empirical,open access,reef fish,abundance,136%,yes,A,
-022-GOE-18-NAK,empirical,open access,reef fish,catch-cpue,-78%,not reported,A,*self-calculated
-025-GOE-17-TUA,empirical,open access,reef fish,biomass,4%,no,A,
-025-GOE-17-TUA,empirical,open access,reef fish,abundance,0%,no,A,
-025-GOE-17-NAU,empirical,open access,reef fish,biomass,-51%,yes,A,
-025-GOE-17-NAU,empirical,open access,reef fish,abundance,28%,no,A,
-022-GOE-18-NAU,empirical,open access,reef fish,catch-cpue,-90%,not reported,A,*self-calculated
-025-GOE-17-NAT,empirical,open access,reef fish,biomass,1%,no,A,
-025-GOE-17-NAT,empirical,open access,reef fish,abundance,14%,no,A,
-077-JUP-10-NAK,empirical,oprn access,reef fish,biomass,103%,yes,A,
-050-COH-13-CC1&2,empirical,open access,reef fish,catch-weight/size,11.50%,no,A,
-050-COH-13-CC1&2,empirical,open access,invertebrates,catch-weight/size,-21%,yes,A,
-050-COH-13-CC1&2,empirical,open access,reef fish,catch-cpue,50%,yes,A,
-083-CIN-05-AHU,empirical,open access,reef fish,biomass,60%,yes,B,
-067-OLI-15-VEL,empirical,open access,invertebrates,catch-total landings,443%,yes,C,"*landing difference is self-calculated between control and closure sites - only report cpue before and after the closure, not compare to the control"
-002-CIN-06-KAR,empirical,open access,reef fish,biomass,37%,yes,B,
-002-CIN-06-KAR,empirical,open access,reef fish,abundance ,2%,no,B,
-003-WIL-06-HI,empirical,permanent reserves,reef fish,biomass,-51%,yes,C,
-059-QUI-21-COR,empirical,open access,reef fish,biomass,43%,not reported,C,
-059-QUI-21-COR,empirical,open access,reef fish,abundance,90%,not reported,C,
-039-BEN-14-ANK,empirical,open access,invertebrates,catch-weight/size,53%,yes,C,
-039-BEN-14-NM,empirical,open access,invertebrates,catch-weight/size,21%,no,C,
-039-BEN-14-AMP,empirical,open access,invertebrates,catch-weight/size,34%,yes,C,
-039-BEN-14-ANK,empirical,open access,invertebrates,catch-cpue,14%,not reported,C,"*self-calculated, what about cpue through time"
-039-BEN-14-NM,empirical,open access,invertebrates,catch-cpue,14%,not reported,C,"*self-calculated, what about cpue through time"
-039-BEN-14-AMP,empirical,open access,invertebrates,catch-cpue,7%,not reported,C,"*self-calculated, what about cpue through time"
-077-JUP-10-YL,empirical,open access,reef fish,biomass,210%,yes,A,
-080-SIL-22-SON,empirical,open access,invertebrates,catch-weight/size,88%,yes,C,
-080-SIL-22-SON,empirical,open access,invertebrates,catch-cpue,775%,yes,C,"*self-calculated, what about cpue through time"
-004-TAY-12,Model,permanent reserves,reef fish,biomass,-30%,Not reported,NA,*spawner biomass
-014-GAM-09,Model,permanent reserves,reef fish,biomass,25%,Not reported,NA,*Case study: optimum scenario under logistic recovery trajectory
-023-CAR-19,Model,permanent reserves,reef fish,catch-cpue,9%,Not reported,NA,*Case study: optimum scenario under 0% overfishing
-023-CAR-20,Model,permanent reserves,reef fish,abundance,0%,Not reported,NA,*Case study: optimum scenario under 0% overfishing
-023-CAR-21,Model,permanent reserves,reef fish,catch-total landings,0%,Not reported,NA,*Case study: optimum scenario under 0% overfishing
-085-PLA-15,Model,open access,invertebrates,catch-total landings,3%,Not reported,NA,
+ref_id,paper_type,control_type,reported_target_species,reported_ecological_variable,reported_value_control,reported_standard_error_control,reported_value_closure,reported_standard_error_closure,"sample_sizes_control (i.e., number of transects, fishing trips)","sample_sizes_control (i.e., number of transects, fishing trips)",units,reported_percentage_changes,reported_percentage_statistical_significance,reported_or_digitized_data,Clusters,sample_size_notes,survey_notes,data_collected_notes
+001-CIN-19-MUL,empirical,open access,reef fish,biomass,252.6,395.4,654.6,108.4,/,/,kg/ha,159%,yes,reported,B,cannot effectively extract sample size,,
+002-CIN-06-MUL,empirical,open access,reef fish,biomass,301.1,28.4,377.6,12.2,30,30,kg/ha,25%,yes,reported,B,"5 managed sites and 5 control sites, three 50m belt transects placed haphazardly at two depths on each site","At the time of our study, the area had been closed for approximately 6 months (pre-harvest condition)",
+002-CIN-06-MUL,empirical,open access,reef fish,abundance,3004,395.4,3065.3,507.4,30,30,density/ha,2%,no,reported,B,"5 managed sites and 5 control sites, three 50m belt transects placed haphazardly at two depths on each site","At the time of our study, the area had been closed for approximately 6 months (pre-harvest condition)",
+013-BAR-09-NE,empirical,open access,reef fish,biomass-vulnerable,175,30,669,125,36,36,kg/ha,282%,yes,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,permanent reserves,reef fish,biomass-vulnerable,508,93,669,125,36,36,kg/ha,32%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,open access,reef fish,abundance-vulnerable,2253,375,3448,375,36,36,no./ha,35%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,permanent reserves,reef fish,abundance-vulnerable,3381,294,3448,375,36,36,no./ha,2%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,open access,reef fish,biomass-non-vulnerable,302,31,381,39,36,36,kg/ha,26%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,permanent reserves,reef fish,biomass-non-vulnerable,307,31,381,39,36,36,kg/ha,24%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,open access,reef fish,abundance-non-vulnerable,2110,178,2153,143,36,36,no./ha,2%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+013-BAR-09-NE,empirical,permanent reserves,reef fish,abundance-non-vulnerable,2281,153,2153,143,36,36,no./ha,-6%,no,reported,A,"The overall analytical design was balanced with 36 replicate transects within each management zone: permanent, periodic, adjacent control permanent, and adjacent control periodic","a single periodic closure opend for a 1-day fishing event, surveyed 3 days-before and 3 days after the harvest, harvest frequency is approximately 6 months",
+064-HAR-14-NE,empirical,open access,reef fish,catch-weight/size,0.46,0.4,0.68,0.07,/,/,kg,45%,yes,digitized,A,"unknown trips they sampled - catch per unit effort and composition of the regular fishery were estimated by sampling as many fishing trips as possible to the open fishing grounds on fringing reefs over 10-12 days at each village, 3 days for all fishing trips during the the 3-days periodic opening period","To answer the research questions above, surveys of fish behavior and fish and benthic ommunities were conducted in all management areas pre- and post-harvest of the periodically harvested closures, using a before after-control-impact-pairs design",reported percentage of change
+064-HAR-14-NE,empirical,open access,reef fish,catch-cpue,2,0.3,3.88,0.7,/,/,kg/person*hour,94%,yes,digitized,A,"unknown trips they sampled - catch per unit effort and composition of the regular fishery were estimated by sampling as many fishing trips as possible to the open fishing grounds on fringing reefs over 10-12 days at each village, 3 days for all fishing trips during the the 3-days periodic opening period","To answer the research questions above, surveys of fish behavior and fish and benthic ommunities were conducted in all management areas pre- and post-harvest of the periodically harvested closures, using a before after-control-impact-pairs design",self-calculated percentage of change
+009-JUP-12-KIA,empirical,open access,reef fish,biomass,594,16,4672.1,1469,10,10,kg/ha,686%,yes,digitized standard error,A,"At each site, trained fish observers from WCS estimated fish size and abundance at 10 replicate 5*50m belt transect at shallow and deep depth","The survey happened 4 weeks into the harvest and 1 year after the harvest, only pre-harvest data is extracted","Only focus on the comparison between Southern tabu and control for this case, as they share similar reef geomorphology, self-calculated percentage of change"
+009-JUP-12-KIA,empirical,open access,reef fish,abundance,109,12,159,17,10,10,no./250m^2,46%,yes,digitized standard error,A,"At each site, trained fish observers from WCS estimated fish size and abundance at 10 replicate 5*50m belt transect at shallow and deep depth","The survey happened 4 weeks into the harvest and 1 year after the harvest, only pre-harvest data is extracted","Only focus on the comparison between Southern tabu and control for this case, as they share similar reef geomorphology, self-calculated percentage of change"
+045-GOE-16-KIO,empirical,open access,reef fish,biomass,/,/,/,/,/,/,/,220%,yes,reported,A,"At each site, the fish community was sampled by conudcting stereo diver operated video surveys along six replicate 5*50m transects separated by 10 m (Kiobo has 2 sites in PHC and 4 sites outside PHC - Appendix A)",,"report response ratio from the paper, no specific value mentioned"
+022-GOE-18-KIO,empirical,open access,reef fish,catch-cpue,/,/,/,/,/,/,/,248%,not reported,reported,A,/,/,"self-calculated percentage change, report response ratio from the paper, no specific value mentioned"
+025-GOE-17-NAK,empirical,open access,reef fish,biomass,/,/,/,/,/,/,/,194%,yes,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+025-GOE-17-NAK,empirical,open access,reef fish,abundance,/,/,/,/,/,/,/,136%,yes,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+022-GOE-18-NAK,empirical,open access,reef fish,catch-cpue,/,/,/,/,/,/,/,-78%,not reported,reported,A,/,/,"self-calculated percentage change, report response ratio from the paper, no specific value mentioned"
+025-GOE-17-TUA,empirical,open access,reef fish,biomass,/,/,/,/,/,/,/,4%,no,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+025-GOE-17-TUA,empirical,open access,reef fish,abundance,/,/,/,/,/,/,/,0%,no,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+025-GOE-17-NAU,empirical,open access,reef fish,biomass,/,/,/,/,/,/,/,-51%,yes,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+025-GOE-17-NAU,empirical,open access,reef fish,abundance,/,/,/,/,/,/,/,28%,no,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+022-GOE-18-NAU,empirical,open access,reef fish,catch-cpue,/,/,/,/,/,/,/,-90%,not reported,reported,A,/,/,"self-calculated percentage change, report response ratio from the paper, no specific value mentioned"
+025-GOE-17-NAT,empirical,open access,reef fish,biomass,/,/,/,/,/,/,/,1%,no,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+025-GOE-17-NAT,empirical,open access,reef fish,abundance,/,/,/,/,/,/,/,14%,no,reported,A,/,/,"report response ratio from the paper, no specific value mentioned"
+077-JUP-10-NAK,empirical,oprn access,reef fish,biomass,897.14,60,1296.97,94.3,10,10,kg/ha,103%,yes,digitized,A,"five replicate of 5*50m belt transects at deep and shallow dpeths at forereef sites, and at reef tops and shallow depths at back reef sites - At consequence, only data from fore reef sites from datasets prior to 2009 were utilized for all analyses and only forereef sites were surveyed in 2009 ","Survey in Nakali happend from Apirl-May 2009, when the site likely remained close (the site would only open in January, June and November)","Biomass data is collected for year 2009, as it represent the longest duration of protection (Halpern et al., 2008)"
+050-COH-13-CC1&2,empirical,open access,reef fish,catch-weight/size,/,/,/,/,/,/,/,11.50%,no,/,A,*Table 2,/,/
+050-COH-13-CC1&2,empirical,open access,invertebrates,catch-weight/size,/,/,/,/,/,/,/,-21%,yes,/,A,/,/,/
+050-COH-13-CC1&2,empirical,open access,reef fish,catch-cpue-gleaning,0.75,0.19,1.64,0.52,327,191,kg/fisher*hour,50%,yes,digitized,A,/,/,/
+050-COH-13-CC1&2,empirical,open access,reef fish,catch-cpue-spear,0.98,0.4,1.31,0.3,327,191,kg/fisher*hour,50%,yes,digitized,A,/,/,/
+050-COH-13-CC1&2,empirical,open access,reef fish,catch-cpue-line,0.63,0.07,0.7,0.44,327,191,kg/fisher*hour,50%,yes,digitized,A,/,/,/
+083-CIN-05-AHU,empirical,open access,reef fish,biomass,127,13,205,20,18,18,kg/ha,60%,yes,reported,B,"Each site has 6 replicate transects, there're 3 tambu sites and 3 control sites",/,/
+067-OLI-15-VEL,empirical,open access,invertebrates,catch-total landings,/,/,/,/,/,/,,443%,yes,/,C,/,/,"landing difference is self-calculated between control and closure sites - only report cpue before and after the closure, not compare to the control"
+067-OLI-15-VEL,empirical,open access,invertebrates,catch-cpue-ban-before,1.91,/,2.37,0.33,/,/,kg/fisher*day,/,/,digitized from FigureS2 for control,C,No mention of sample size,Survey happened 30-days before the closure and 30-days after the opening,
+067-OLI-15-VEL,empirical,open access,invertebrates,catch-cpue-ban-after,2.95,/,4.42,0.51,/,/,kg/fisher*day,/,/,digitized from FigureS2 for control,C,No mention of sample size,Survey happened 30-days before the closure and 30-days after the opening,
+002-CIN-06-KAR,empirical,open access,reef fish,biomass,139.1,4.6,101.3,10.4,18,18,kg/ha,37%,yes,reported,B,"same as 002-CIN-06-MUL, the Kakarotan has 3 control and 3 periodic sites",our research in Kakarotan occured over 10 days in September 2002,
+002-CIN-06-KAR,empirical,open access,reef fish,abundance ,1971.1,112.8,2026.7,358.2,18,18,density/ha,2%,no,reported,B,"same as 002-CIN-06-MUL, the Kakarotan has 3 control and 3 periodic sites",our research in Kakarotan occured over 10 days in September 2002,
+003-WIL-06-HI,empirical,permanent reserves,reef fish,biomass,/,/,/,/,/,/,/,-51%,yes,reported,C,/,/,/
+059-QUI-21-COR,empirical,open access,reef fish,biomass,0.67,0.13,0.95,0.17,/,/,tons/ha,43%,not reported,reported,C,wait for Tasha's response,survey is conducted inside and outside refugia through year 2012 to 2017,"Biomass data is collected for year 2017 as it represent the longest duration of protection (Halpern et al., 2008)"
+059-QUI-21-COR,empirical,open access,reef fish,abundance,0.33,0.06,0.63,0.23,/,/,no./m^2,90%,not reported,reported,C,wait for Tasha's response,survey is conducted inside and outside refugia through year 2012 to 2017,"Biomass data is collected for year 2017 as it represent the longest duration of protection (Halpern et al., 2008)"
+039-BEN-14-ANK,empirical,open access,invertebrates,catch-weight/size,/,/,/,/,/,/,/,53%,yes,,C,/,/,/
+039-BEN-14-NM,empirical,open access,invertebrates,catch-weight/size,/,/,/,/,/,/,/,21%,no,,C,/,/,/
+039-BEN-14-AMP,empirical,open access,invertebrates,catch-weight/size,/,/,/,/,/,/,/,34%,yes,,C,/,/,/
+039-BEN-14-ANK,empirical,open access,invertebrates,catch-cpue-before,2.39,0.27,1.3,0.25,/,/,kg/fisher*day,14%,not reported,digitized,C,no sample size reported,"survey is conducted before and after closure, between 2004 and 2005, 2005 and 2006","CPUE is collected for closure between year 2005 and 2006, as it represents the longest duration of protection (Halpern et al., 2008)"
+039-BEN-14-NM,empirical,open access,invertebrates,catch-cpue-before,2.39,0.27,1.3,0.25,/,/,kg/fisher*day,14%,not reported,digitized,C,no sample size reported,"survey is conducted before and after closure, between 2005 and 2006","CPUE is collected for closure between year 2005 and 2006, as it represents the longest duration of protection (Halpern et al., 2008)"
+039-BEN-14-AMP,empirical,open access,invertebrates,catch-cpue-before,2.39,0.27,1.6,0.25,/,/,kg/fisher*day,7%,not reported,digitized,C,no sample size reported,"survey is conducted before and after closure, between 2005 and 2006","CPUE is collected for closure between year 2005 and 2006, as it represents the longest duration of protection (Halpern et al., 2008)"
+039-BEN-14-ANK,empirical,open access,invertebrates,catch-cpue-after,2.79,0.14,3.39,0.14,/,/,kg/fisher*day,7%,not reported,digitized,C,no sample size reported,"survey is conducted before and after closure, between 2004 and 2005, 2005 and 2006","CPUE is collected for closure between year 2005 and 2006, as it represents the longest duration of protection (Halpern et al., 2008)"
+039-BEN-14-NM,empirical,open access,invertebrates,catch-cpue-after,2.79,0.14,2.9,0.12,/,/,kg/fisher*day,7%,not reported,digitized,C,no sample size reported,"survey is conducted before and after closure, between 2005 and 2006","CPUE is collected for closure between year 2005 and 2006, as it represents the longest duration of protection (Halpern et al., 2008)"
+039-BEN-14-AMP,empirical,open access,invertebrates,catch-cpue-after,2.79,0.14,2.9,0.12,/,/,kg/fisher*day,7%,not reported,digitized,C,no sample size reported,"survey is conducted before and after closure, between 2005 and 2006","CPUE is collected for closure between year 2005 and 2006, as it represents the longest duration of protection (Halpern et al., 2008)"
+077-JUP-10-YL,empirical,open access,reef fish,biomass,218.54,/,665.56,109.27,10,10,kg/ha,210%,yes,digitized,A,same sample size as 077-JUP-10-NAK,survey is conducted in 2007 and 2008 only for Yamotu Lase,"Biomass data is collected for year 2008, as it represent the longest duration of protection (Halpern et al., 2008)"
+080-SIL-22-SON,empirical,open access,invertebrates,catch-weight/size,/,/,/,/,/,/,/,88%,yes,/,C,/,/,/
+080-SIL-22-SON,empirical,open access,invertebrates,catch-cpue,0.69,0.03,3.659,0.28,/,/,kg/fisher*hour,775%,yes,reported,C,no sample size reported,"survey is conducted during opening and 90 days after opening, only data during opening is collected","CPUE is collected for the forth opening event in August 2020, as it represents the longest duration of protection (Halpern 2008)"
+004-TAY-12,Model,permanent reserves,reef fish,biomass,/,/,/,/,/,/,/,-30%,Not reported,/,/,/,/,*spawner biomass
+014-GAM-09,Model,permanent reserves,reef fish,biomass,/,/,/,/,/,/,/,25%,Not reported,/,/,/,/,*Case study: optimum scenario under logistic recovery trajectory
+023-CAR-19,Model,permanent reserves,reef fish,catch-cpue,/,/,/,/,/,/,/,9%,Not reported,/,/,/,/,*Case study: optimum scenario under 0% overfishing
+023-CAR-20,Model,permanent reserves,reef fish,abundance,/,/,/,/,/,/,/,0%,Not reported,/,/,/,/,*Case study: optimum scenario under 0% overfishing
+023-CAR-21,Model,permanent reserves,reef fish,catch-total landings,/,/,/,/,/,/,/,0%,Not reported,/,/,/,/,*Case study: optimum scenario under 0% overfishing
+085-PLA-15,Model,open access,invertebrates,catch-total landings,/,/,/,/,/,/,/,3%,Not reported,/,/,/,/,/
