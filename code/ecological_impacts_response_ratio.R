@@ -145,7 +145,7 @@ clusters <- c("A" = "#00468b", "B" = "#ed0000", "C" = "#42b540", "NA(Model paper
 g_case_biomass <- ggplot(data = data_response_ratio_non_cpue %>% filter(reported_ecological_variable == "Biomass"), aes(x = response_ratio_log, y = ref_id, shape = control_type, fill = clusters)) +
   geom_errorbar(aes(xmin = response_ratio_log - study_variance, xmax = response_ratio_log + study_variance), width = 0.1, linewidth = 0.3) +
   geom_point(size = 2.5, color = "black") +
-  scale_x_continuous(limits = c(-2.5, 2.5), breaks = seq(-2.5, 2.5, by = 1)) +
+  scale_x_continuous(limits = c(-0.5, 2.5), breaks = seq(-0.5, 2, by = 0.5)) +
   scale_shape_manual(name = "Type of control", values = c(21,23)) +
   scale_fill_manual(name = "Cluster", values = clusters) +
   labs(x = "Log (Response ratio)", y = "Study") +
@@ -178,7 +178,7 @@ g_case_abundance
 
 g_case_cpue <- ggplot(data = data_response_ratio_cpue, aes(x = response_ratio_log, y = reorder(ref_id, response_ratio_log), shape = control_type, fill = clusters)) +
   geom_point(size = 2.5, color = "black") +
-  #scale_x_continuous(limits = c(-5, 5), breaks = seq(-5, 5, by = 2.5)) +
+  scale_x_continuous(limits = c(-0.5, 2.5), breaks = seq(-0.5, 2, by = 0.5)) +
   scale_shape_manual(name = "Type of control", values = c(21,23)) +
   scale_fill_manual(name = "Cluster", values = clusters) +
   labs(x = "Log (Response ratio)", y = "Study") +
@@ -194,7 +194,6 @@ g_case_cpue
 g_pct_change <- ggplot(data_pct_all, aes(x = reorder(reported_ecological_variable, -mean_pct_change), y = pct_change)) +
   stat_summary(fun = mean, geom = "bar", fill = "grey90", color = "black", width = 0.6, linewidth = 0.3) +
   geom_point(aes(fill = clusters, shape = control_type), position = position_nudge(x = 0), size = 1.5) +
-  #scale_y_continuous(limits = c(0, 205), sec.axis = sec_axis(~.+300, name = "Zoomed In")) +
   scale_shape_manual(name = "Type of control", values = c(21,23)) +
   scale_fill_manual(name = "Cluster", values = clusters) +
   labs(y = "Change in Biological Measures (%)") +
