@@ -8,227 +8,102 @@ library(tidyverse)
 ### set the plot directory ###
 plotdir <- "figure"
 
-### read in data ###
-empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
+#### read in data ####
+empirical_cluster <- read.csv("data/empirical_cluster.csv") %>%
   janitor::clean_names()
 
-
-#### clean empirical data ####
-empirical_clean <- empirical %>%
-  # remove the first column and the first row
-  select(-x) %>%
-  slice(-1) %>%
-  # rename the column 
-  rename(case_studied_clean = number_of_closures_studied_in_case_paper_if_paper_is_one_case,
-         actors_type_governance_clean = x_actors_type_governance_clean,
-         size_stan_ha = size_of_closure_standardized_to_ha_1_km2_100_ha,
-         size_bin = size_of_closure_clean,
-         length_closed_stan_years = length_of_time_closed_range_standardized_to_years,
-         length_closed_bin = length_close_clean,
-         length_open_stan_years = length_of_time_open_range_standardized_to_years,
-         length_open_bin = length_open_clean
-  ) %>%
-  # keep only the cleaned column (remove the original quote column)
-  select(source, # context
-         country_clean, 
-         location_clean, 
-         continent_clean,
-         types_of_gear_used_clean, 
-         case_studied_clean, 
-         goverance_type_overall_clean,
-         actors_type_governance_clean,
-         traditional_history_clean,
-         start_date_clean,
-         turf_clean,
-         ecosystem_clean,
-         short_type_of_closure_clean, # design
-         governance_type_design_clean,
-         actors_type_design_clean,
-         motivations_clean,
-         criteria_open_clean,
-         decision_making_clean,
-         size_stan_ha,
-         size_bin,
-         length_closed_stan_years,
-         length_closed_bin,
-         length_open_stan_years,
-         length_open_bin,
-         percentage_fishing_ground_closed_clean,
-         number_of_species_clean,
-         species_category_clean,
-         enforcement_clean,
-         information_collected_clean) %>%
-  # correct the syntex error
-  mutate(short_type_of_closure_clean = ifelse(short_type_of_closure_clean == "Dynamic/Triggered Closure", "Dynamic/Triggered closure", short_type_of_closure_clean))
-
-# Assign the cluster to observations based on the cluster analysis
-empirical_group <- empirical_clean %>%
-  select(source, #Supplementary variable (not involved in mca analysis)
-         country_clean, #Supplementary variable
-         continent_clean, #Supplementary variable
-         short_type_of_closure_clean,
-         governance_type_design_clean,
-         decision_making_clean,
-         criteria_open_clean,
-         size_stan_ha, 
-         length_closed_stan_years,
-         length_open_stan_years,
-         species_category_clean, 
-         enforcement_clean) %>%
-  # clean the variable categories
-  mutate(governance_type_design_clean = ifelse(governance_type_design_clean == "Co-managment", "Co-management", governance_type_design_clean))%>%
-  mutate(decision_making_clean = ifelse(decision_making_clean == "Community village led", "Community/village led", decision_making_clean)) %>%
-  mutate(enforcement_clean = ifelse(enforcement_clean == "Goverment led", "Government led", enforcement_clean)) %>%
-  mutate(species_category_clean = ifelse(species_category_clean == "Finfish", "Reef fish", species_category_clean)) %>%
-  mutate(size_stan_ha = as.numeric(gsub(",", "", size_stan_ha)),
-         length_closed_stan_years = as.numeric(gsub(",","", length_closed_stan_years)),
-         length_open_stan_years = as.numeric(gsub(",","", length_open_stan_years))) %>%
-  mutate(size_stan_log = log(size_stan_ha+1),
-         length_closed_stan_years_log = log(length_closed_stan_years+1),
-         length_open_stan_years_log = log(length_open_stan_years+1))%>%
-  mutate(cluster = case_when(
-    row_number() %in% c(27,28,12,14,13,15,3,4,2,5,25,7,11,6,9,10,8,20,21)~"A",
-    row_number() %in% c(16,38,37,39,18,36,1,17,24,19,22)~"B",
-    row_number() %in% c(29,32,33,30,31,34,35)~"C",
-    row_number() %in% c(40,50,23,41,44,42,43)~"D",
-    row_number() %in% c(45,46)~"E",
-    row_number() %in% c(47,48,49)~"F"
-  )) %>%
+# clean data
+design_famd_cluster <- empirical_cluster %>% select(
+  ref_id,
+  governance_type_design_clean,
+  criteria_open_clean,
+  decision_making_clean,
+  closure_size_ha,
+  time_closed_years,
+  time_open_years,
+  species_category_clean,
+  enforcement_clean,
+  cluster
+) %>%
+  mutate(closure_size_ha = as.numeric(gsub(",", "", closure_size_ha)),
+         time_closed_years = as.numeric(gsub(",", "", time_closed_years)),
+         time_open_years = as.numeric(gsub(",", "", time_open_years))) %>%
   na.omit()
+
+
 
 ########################################################################
 # Make figure to see the difference
 
 # Quantitative variable (size, length of open, length of close)
-empirical_quanti <- empirical_group %>%
-  select(size_stan_ha, length_closed_stan_years, length_open_stan_years, cluster) %>%
-  gather(key = "Variable", value = "Value", size_stan_ha, length_closed_stan_years, length_open_stan_years) %>%
-  mutate(Variable = case_when(Variable == "size_stan_ha"~"Size (ha)",
-                              Variable == "length_closed_stan_years"~"Length of closure (years)",
-                              Variable == "length_open_stan_years"~"Length of open (years)"))
+empirical_quanti <- design_famd_cluster %>%
+  select(closure_size_ha, time_closed_years, time_open_years, cluster) %>%
+  gather(key = "Variable", value = "Value", closure_size_ha, time_closed_years, time_open_years) %>%
+  mutate(Variable = case_when(Variable == "closure_size_ha"~"Size (ha)",
+                              Variable == "time_closed_years"~"Length of closure (years)",
+                              Variable == "time_open_years"~"Length of open (years)"))
 
 # Qualitative variable 
 
 # governance type
-empirical_quali_govern <- empirical_group %>%
+empirical_quali_govern <- design_famd_cluster %>%
   select(governance_type_design_clean, cluster) %>%
   group_by(cluster, governance_type_design_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(total_case = case_when(cluster == "A"~19,
-                                cluster == "B"~11,
-                                cluster == "C"~7,
-                                cluster == "D"~7,
-                                cluster == "E"~2,
-                                cluster == "F"~3)) %>%
-  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
-  mutate(percentage = (type_count/total_case)*100) %>%
-  mutate(percentage = round(percentage, 0)) %>%
-  mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Governance type") %>%
-  rename(variable_category = governance_type_design_clean) %>%
-  select(cluster, variable_type, variable_category, everything()) %>%
-  # change the name of the variable category
-  mutate(variable_category = case_when(variable_category == "Co-management"~"Co-mgmt",
-                                       variable_category == "Bottom-up"~"Btm-up",
-                                       variable_category == "Top-down"~"Top-dwn"))
+  mutate(governance_type_design_clean = case_when(governance_type_design_clean == "Co-management"~"Co-mgmt",
+                                                  governance_type_design_clean == "Bottom-up"~"Btm-up",
+                                                  governance_type_design_clean == "Top-down"~"Top-dwn"))
 
 
 # Decision making process
-empirical_quali_decision <- empirical_group %>%
+empirical_quali_decision <- design_famd_cluster %>%
   select(decision_making_clean, cluster) %>%
   group_by(cluster, decision_making_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
-  mutate(total_case = case_when(cluster == "A"~19,
-                                cluster == "B"~11,
-                                cluster == "C"~7,
-                                cluster == "D"~7,
-                                cluster == "E"~2,
-                                cluster == "F"~3)) %>%
-  mutate(percentage = (type_count/total_case)*100) %>%
-  mutate(percentage = round(percentage, 0)) %>%
-  mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Decision making type") %>%
-  rename(variable_category = decision_making_clean) %>%
-  select(cluster, variable_type, variable_category, everything()) %>%
   # change the name of the variable category
-  mutate(variable_category = case_when(variable_category == "Collaboration community-NGO"~"Collab comm-NGO",
-                                       variable_category == "Collaboration community-government"~"Collab comm-gov",
-                                       variable_category == "Community/village led"~"Comm led",
-                                       variable_category == "Government led"~"Gov led",
-                                       variable_category == "Others (Academia institution led)"~"Others"))
+  mutate(decision_making_clean = case_when(decision_making_clean == "Collaboration community-NGO"~"Collab comm-NGO",
+                                           decision_making_clean == "Collaboration community-government"~"Collab comm-gov",
+                                           decision_making_clean == "Community led"~"Comm led",
+                                           decision_making_clean == "Government led"~"Gov led",
+                                           decision_making_clean == "Collaboration community-academia"~"Collab comm-aca"))
 
 # criteria of opening
-empirical_quali_open <- empirical_group %>%
+empirical_quali_open <- design_famd_cluster %>%
   select(criteria_open_clean, cluster) %>%
   group_by(cluster, criteria_open_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
-  mutate(total_case = case_when(cluster == "A"~19,
-                                cluster == "B"~11,
-                                cluster == "C"~7,
-                                cluster == "D"~7,
-                                cluster == "E"~2,
-                                cluster == "F"~3)) %>%
-  mutate(percentage = (type_count/total_case)*100) %>%
-  mutate(percentage = round(percentage, 0)) %>%
-  mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Criteria of opening") %>%
-  rename(variable_category = criteria_open_clean) %>%
-  select(cluster, variable_type, variable_category, everything()) %>%
   # change the name of the variable category
-  mutate(variable_category = case_when(variable_category == "Ecosystem/Conservation"~"Conserv",
-                                       variable_category == "Social"~"Soc",
-                                       variable_category == "Governance"~"Gov",
-                                       variable_category == "Fisheries management/Fishing income"~"Fish mgmt"))
+  mutate(criteria_open_clean = case_when(criteria_open_clean == "Ecosystem/Conservation"~"Conserv",
+                                         criteria_open_clean == "Social"~"Soc",
+                                         criteria_open_clean == "Governance"~"Gov",
+                                         criteria_open_clean == "Fisheries management/Fishing income"~"Fish mgmt",
+                                         criteria_open_clean == "Fisheries management/Fishing income; Social"~"Soc"))
 
 # target species
-empirical_quali_species <- empirical_group %>%
+empirical_quali_species <- design_famd_cluster %>%
   select(species_category_clean, cluster) %>%
   group_by(cluster, species_category_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
-  mutate(total_case = case_when(cluster == "A"~19,
-                                cluster == "B"~11,
-                                cluster == "C"~7,
-                                cluster == "D"~7,
-                                cluster == "E"~2,
-                                cluster == "F"~3)) %>%
-  mutate(percentage = (type_count/total_case)*100) %>%
-  mutate(percentage = round(percentage, 0)) %>%
-  mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Target species") %>%
-  rename(variable_category = species_category_clean) %>%
-  select(cluster, variable_type, variable_category, everything()) %>%
   # change the name of the variable category
-  mutate(variable_category = case_when(variable_category == "Invertebrates"~"Inv",
-                                       variable_category == "Marine mammals/sea turtles/seabirds"~"MM/ST/SB",
-                                       .default = variable_category))
+  mutate(species_category_clean = case_when(species_category_clean == "Invertebrates"~"Invert",
+                                            .default = species_category_clean))
 
 # enforcement type
-empirical_quali_enforcement <- empirical_group %>%
+empirical_quali_enforcement <- design_famd_cluster %>%
   select(enforcement_clean, cluster) %>%
   group_by(cluster, enforcement_clean) %>%
   summarize(type_count = n()) %>%
-  mutate(cluster = factor(cluster, levels = c("A", "B", "C", "D", "E", "F"))) %>%
-  mutate(total_case = case_when(cluster == "A"~19,
-                                cluster == "B"~11,
-                                cluster == "C"~7,
-                                cluster == "D"~7,
-                                cluster == "E"~2,
-                                cluster == "F"~3)) %>%
-  mutate(percentage = (type_count/total_case)*100) %>%
-  mutate(percentage = round(percentage, 0)) %>%
-  mutate(label = paste0(percentage, "%")) %>%
   mutate(variable_type = "Enforcement type") %>%
-  rename(variable_category = enforcement_clean) %>%
-  select(cluster, variable_type, variable_category, everything()) %>%
  # change the name of the variable category
-  mutate(variable_category = case_when(variable_category == "Collaboration community-NGO"~"Collab comm-NGO",
-                                                           variable_category == "Collaboration community-government"~"Collab comm-gov",
-                                                           variable_category == "Community/village led"~"Comm led",
-                                                           variable_category == "Government led"~"Gov led",
-                                                           variable_category == "No enforcement"~"No enf"))
+  mutate(enforcement_clean = case_when(enforcement_clean == "Collaboration community-NGO"~"Collab comm-NGO",
+                                       enforcement_clean == "Collaboration community-government"~"Collab comm-gov",
+                                       enforcement_clean == "Community led"~"Comm led",
+                                       enforcement_clean == "Government led"~"Gov led",
+                                       enforcement_clean == "No enforcement"~"No enf"))
 
 
 
@@ -290,7 +165,7 @@ barplot_theme <- theme(axis.text=element_text(size=8),
 # governance
 govern_type = c("Co-mgmt" = "#0099b4", "Btm-up" = "#925e9f", "Top-dwn" = "#fdaf91")
 
-g1 <- ggplot(data = empirical_quali_govern, aes(x=cluster, y = type_count, fill = variable_category)) +
+g1 <- ggplot(data = empirical_quali_govern, aes(x=cluster, y = type_count, fill = governance_type_design_clean)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
   labs(y = "Case count") +
@@ -305,9 +180,9 @@ g1 <- ggplot(data = empirical_quali_govern, aes(x=cluster, y = type_count, fill 
 g1
 
 # decision making process
-decision_type = c("Collab comm-gov" = "#ed0000", "Collab comm-NGO" = "#42b540", "Comm led" = "#0099b4", "Gov led" = "#925e9f", "Others" = "#fdaf91")
+decision_type = c("Collab comm-gov" = "#ed0000", "Collab comm-NGO" = "#42b540", "Comm led" = "#0099b4", "Gov led" = "#925e9f", "Collab comm-aca" = "#fdaf91")
 
-g2 <- ggplot(data = empirical_quali_decision, aes(x=cluster, y = type_count, fill = variable_category)) +
+g2 <- ggplot(data = empirical_quali_decision, aes(x=cluster, y = type_count, fill = decision_making_clean)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
   scale_fill_manual(name = "Categories", values = decision_type) +
@@ -325,7 +200,7 @@ g2
 # criteria open
 open_type <- c("Soc" = "#42b540", "Gov" = "#0099b4", "Fish mgmt" = "#925e9f", "Conserv" = "#fdaf91")
 
-g3 <- ggplot(data = empirical_quali_open, aes(x=cluster, y = type_count, fill = variable_category)) +
+g3 <- ggplot(data = empirical_quali_open, aes(x=cluster, y = type_count, fill = criteria_open_clean)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
   labs(x = "Cluster") +
@@ -343,9 +218,9 @@ g3
 
 # target species
 
-species_type = c("Demersal fish" = "#ed0000", "Reef fish" = "#42b540", "Inv" = "#0099b4", "Pelagic fish" = "#925e9f", "MM/ST/SB" = "#fdaf91")
+species_type = c("Demersal fish" = "#ed0000", "Reef fish" = "#42b540", "Invert" = "#0099b4", "Pelagic fish" = "#925e9f", "MM/ST/SB" = "#fdaf91")
 
-g4 <- ggplot(data = empirical_quali_species, aes(x=cluster, y = type_count, fill = variable_category)) +
+g4 <- ggplot(data = empirical_quali_species, aes(x=cluster, y = type_count, fill = species_category_clean)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
   labs(x = "Cluster", y = "Case count") +
@@ -364,7 +239,7 @@ g4
 
 enforcement_type = c("Collab comm-gov" = "#ed0000", "Collab comm-NGO" = "#42b540", "Comm led" = "#0099b4", "Gov led" = "#925e9f", "No enf" = "#fdaf91")
 
-g5 <- ggplot(data = empirical_quali_enforcement, aes(x=cluster, y = type_count, fill = variable_category)) +
+g5 <- ggplot(data = empirical_quali_enforcement, aes(x=cluster, y = type_count, fill = enforcement_clean)) +
   facet_grid(variable_type~., space = "free_y", scales = "free_y") +
   geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
   labs(x = "Cluster") +
