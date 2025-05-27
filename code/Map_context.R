@@ -10,8 +10,7 @@ library(scatterpie)
 plotdir <- "figure"
 
 # read in data
-empirical <- read.csv("data/Cleaned sheets - Full-text screening - Emperical papers_Context_Design_Final.csv", na.strings = "/") %>%
-  janitor::clean_names()
+empirical <- read.csv("data/clean_data/empirical_cluster.csv")
 
 modeling <- read.csv("data/Cleaned sheets - Full-text screening - Modeling papers.csv", na.strings = "/") %>%
   janitor::clean_names()
@@ -19,52 +18,6 @@ modeling <- read.csv("data/Cleaned sheets - Full-text screening - Modeling paper
 country_location <- read.csv("data/country_location.csv")
 
 # clean data
-
-# emperical data
-empirical_clean <- empirical %>%
-  # remove the first column and the first row
-  select(-x) %>%
-  slice(-1) %>%
-  # rename the column 
-  rename(case_studied_clean = number_of_closures_studied_in_case_paper_if_paper_is_one_case,
-         actors_type_governance_clean = x_actors_type_governance_clean,
-         size_stan_ha = size_of_closure_standardized_to_ha_1_km2_100_ha,
-         size_bin = size_of_closure_clean,
-         length_closed_stan_years = length_of_time_closed_range_standardized_to_years,
-         length_closed_bin = length_close_clean,
-         length_open_stan_years = length_of_time_open_range_standardized_to_years,
-         length_open_bin = length_open_clean
-         ) %>%
-  # keep only the cleaned column (remove the original quote column)
-  select(source, # context
-         country_clean, 
-         location_clean, 
-         continent_clean,
-         types_of_gear_used_clean, 
-         case_studied_clean, 
-         goverance_type_overall_clean,
-         actors_type_governance_clean,
-         traditional_history_clean,
-         start_date_clean,
-         turf_clean,
-         ecosystem_clean,
-         short_type_of_closure_clean, # design
-         governance_type_design_clean,
-         actors_type_design_clean,
-         motivations_clean,
-         criteria_open_clean,
-         decision_making_clean,
-         size_stan_ha,
-         size_bin,
-         length_closed_stan_years,
-         length_closed_bin,
-         length_open_stan_years,
-         length_open_bin,
-         percentage_fishing_ground_closed_clean,
-         number_of_species_clean,
-         species_category_clean,
-         enforcement_clean,
-         information_collected_clean)
 
 # modeling data
 modeling_clean <- modeling %>%
@@ -84,8 +37,8 @@ modeling_clean <- modeling %>%
 # further clean the data to make map
 
 # emperical 
-empirical_count <- empirical_clean %>%
-  select(source,country_clean, location_clean, location_clean, case_studied_clean) %>%
+empirical_count <- empirical %>%
+  select(ref_id,country_clean, location_clean, location_clean) %>%
   # clean country name
   mutate(country_clean = case_when(country_clean == "Madagascar "~"Madagascar",
                                    country_clean == "Papua New Guinea "~"Papua New Guinea",
@@ -94,29 +47,25 @@ empirical_count <- empirical_clean %>%
                                    country_clean == "Soloman Islands"~"Solomon Islands",
                                    .default = country_clean)) %>%
   # differentiate Chile(Easter Island), U.S. (Hawaii) and U.S.(Alaska)
-  mutate(country_clean = case_when(location_clean == "Hawaii"~"U.S.(Hawaii)",
-                                   location_clean == "Hawaii, Waikiki"~"U.S.(Hawaii)",
+  mutate(country_clean = case_when(location_clean == "Hawaii, Waikiki"~"U.S.(Hawaii)",
                                    location_clean == "Alaska"~"U.S.(Alaska)",
-                                   location_clean == "Easter Island, Rapa Nui"~"Chile(Easter Island)",
                                    .default = country_clean)) %>%
   group_by(country_clean) %>%
-  summarize(case_studied_total = sum(case_studied_clean)) %>%
-  # Madagascar should be 36 - the other 3 cases from different papers but focus on the same region
-  mutate(case_studied_total = ifelse(country_clean == "Madagascar", 36, case_studied_total)) %>%
+  summarize(case_studied_total = n()) %>%
   # add paper type
   mutate(paper_type = "Empirical")
 
 # modeling
 modeling_count <- modeling_clean %>%
   filter(!is.na(country_clean)) %>%
-  select(ref_id, country_clean, location_clean, case_number_clean) %>%
+  select(ref_id, country_clean, location_clean) %>%
   mutate(country_clean = case_when(country_clean == "U.S. (Guam)"~"U.S.(Guam)",
                                    .default = country_clean)) %>%
   group_by(country_clean) %>%
-  summarize(case_studied_total = sum(case_number_clean)) %>%
+  summarize(case_studied_total = n()) %>%
   # combine with the country geographic location
   # add paper type
-  mutate(paper_type = "Modeling")
+  mutate(paper_type = "Theoretical")
 
 # calculate total modeling & empirical cases
 total_cases <- bind_rows(empirical_count, modeling_count) %>%
@@ -141,10 +90,9 @@ total_cases_percentage <- total_cases %>%
   #join with the country location in lat/long
   left_join(country_location, by = "country_clean") %>%
   #set up the radius
-  mutate(radius = case_when(total_cases>=1 & total_cases <10~3,
-                            total_cases>=10 & total_cases<20~6,
-                            total_cases>=20 & total_cases<30~9,
-                            total_cases>=30 & total_cases<40~12))
+  mutate(radius = case_when(total_cases>=1 & total_cases<=2~2,
+                            total_cases>2 & total_cases<=6~6,
+                            total_cases>=6~10))
 
 
 ##############################################################
@@ -168,7 +116,8 @@ world_final <- world %>%
                                                  "Mexico",
                                                  "Madagascar",
                                                  "South Africa",
-                                                 "Australia")~"Yes",
+                                                 "Australia",
+                                                 "Tanzania")~"Yes",
                                    .default = "No"))
 
 # Make figure below
@@ -202,7 +151,7 @@ paper_fill <- c("percentage_empirical" = "#f0027f", "percentage_modeling" = "#38
 
 radius_labeller <- function(radius, label){
   
-  label = (radius/3)*10
+  label = radius
   
   return (label)
 }
@@ -218,17 +167,144 @@ worldplot <- ggplot(world_final, aes(long, lat, fill = has_temporary, group = gr
                   linewidth = 0.3)+
   geom_scatterpie_legend(r = total_cases_percentage$radius,
                          x = -170,
-                         y = -40,
-                         n = 4,
+                         y = -50,
+                         n = 3,
                          labeller = radius_labeller) +
-  scale_fill_manual(name = "Case type", values = paper_fill, labels = c("percentage_empirical" = "Empirical", "percentage_modeling" = "Modeling")) +
+  scale_fill_manual(name = "Case types", values = paper_fill, labels = c("percentage_empirical" = "Empirical", "percentage_modeling" = "Theoretical")) +
+  geom_text(data = total_cases_percentage, aes(x = country_long, y = country_lat, label = country_clean, hjust = hjust, vjust = vjust), size = 2.5, inherit.aes = FALSE, fontface = "bold") +
   coord_fixed(1.3) +
-  theme_bw() + base_theme + theme(legend.position = "bottom")
+  labs(tag = "A") +
+  theme_bw() + base_theme + theme(legend.position = c(0.2, 0.13),
+                                  legend.key.size = unit(0.3, "cm"),
+                                  legend.text = element_text(size = 8),
+                                  legend.title = element_text(size = 8),
+                                  plot.tag = element_text(size = 10, face = "bold"))
 
 worldplot
 
+#################################################################################
+# Make bar plot
+
+empirical_total_cases <- empirical %>%
+  mutate(short_type_of_closure_clean = ifelse(continent_clean == "Africa", "Determinate closure", short_type_of_closure_clean)) %>%
+  mutate(short_type_of_closure_clean = ifelse(location_clean == "Hawaii, Waikiki", "Rotational closure", short_type_of_closure_clean)) %>%
+  # clean country name
+  mutate(country_clean = case_when(country_clean == "Madagascar "~"Madagascar",
+                                   country_clean == "Papua New Guinea "~"Papua New Guinea",
+                                   country_clean == "Norway, and countries in EU (Danish, Swedish, German, Dutch, Belgium)"~"Norway",
+                                   country_clean == "French Polynesia "~"French Polynesia",
+                                   country_clean == "Soloman Islands"~"Solomon Islands",
+                                   .default = country_clean)) %>%
+  mutate(country_clean = case_when(location_clean == "Hawaii, Waikiki"~"United States",
+                                   location_clean == "Alaska"~"United States",
+                                   .default = country_clean)) %>%
+  group_by(country_clean) %>%
+  summarize(total_cases_all = n())
+  
+empirical_bar <- empirical %>%
+  mutate(short_type_of_closure_clean = ifelse(continent_clean == "Africa", "Determinate closure", short_type_of_closure_clean)) %>%
+  mutate(short_type_of_closure_clean = ifelse(location_clean == "Hawaii, Waikiki", "Rotational closure", short_type_of_closure_clean)) %>%
+  # clean country name
+  mutate(country_clean = case_when(country_clean == "Madagascar "~"Madagascar",
+                                   country_clean == "Papua New Guinea "~"Papua New Guinea",
+                                   country_clean == "Norway, and countries in EU (Danish, Swedish, German, Dutch, Belgium)"~"Norway",
+                                   country_clean == "French Polynesia "~"French Polynesia",
+                                   country_clean == "Soloman Islands"~"Solomon Islands",
+                                   .default = country_clean)) %>%
+  mutate(country_clean = case_when(location_clean == "Hawaii, Waikiki"~"United States",
+                                   location_clean == "Alaska"~"United States",
+                                   .default = country_clean)) %>%
+  group_by(country_clean, short_type_of_closure_clean) %>%
+  summarize(total_cases = n()) %>%
+  left_join(empirical_total_cases, by = "country_clean") %>%
+  mutate(source = "Empirical") 
+
+modeling_total_cases <- modeling_clean %>%
+  mutate(country_clean = ifelse(country_clean == "U.S. (Guam)", "United States", country_clean)) %>%
+  mutate(country_clean = ifelse(is.na(country_clean), "Simulated study", country_clean)) %>%
+  group_by(country_clean) %>%
+  summarize(total_cases_all = n())
+
+modeling_bar <- modeling_clean %>%
+  mutate(country_clean = ifelse(country_clean == "U.S. (Guam)", "United States", country_clean)) %>%
+  mutate(country_clean = ifelse(is.na(country_clean), "Simulated study", country_clean)) %>%
+  group_by(country_clean, objectives_scenarios_clean) %>%
+  summarize(total_cases = n()) %>%
+  left_join(modeling_total_cases, by = "country_clean") %>%
+  mutate(source = "Theoretical")
+
+#################################################################
+# Make bar plot
+
+# Theme
+bar_theme <-  theme(axis.text=element_text(size=8),
+                     axis.title=element_text(size=9),
+                     legend.text=element_text(size=8),
+                     legend.title=element_text(size=9),
+                     strip.text=element_text(size=8),
+                     plot.title=element_text(size=9),
+                     # Gridlines
+                     panel.grid.major = element_blank(), 
+                     panel.grid.minor = element_blank(),
+                     panel.background = element_blank(),
+                     axis.line = element_line(colour = "black"),
+                     # Legend
+                     legend.key = element_rect(fill = NA, color=NA),
+                     legend.background = element_rect(fill=alpha('blue', 0)))
+
+closure_type <- c("Periodic closure" = "#7fc97f", "Dynamic/Triggered closure" = "#beaed4", "Rotational closure" = "#fdc086", "Determinate closure" = "#ffff99")
+
+
+# make figure
+g_empirical_type <- ggplot(data = empirical_bar, aes(x= reorder(country_clean, -total_cases_all), y = total_cases, fill = short_type_of_closure_clean)) +
+  facet_grid(source~., space = "free_y", scales = "free_y") +
+  geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
+  scale_fill_manual(name = "Closure types", values = closure_type) +
+  labs(x = "", y = "Number of cases", tags = "B") +
+  scale_y_continuous(lim = c(0, 11), breaks = seq(0, 10, 5)) +
+  theme_bw() + bar_theme + theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                                 legend.position = c(0.7, 0.75),
+                                 legend.key.size = unit(0.3, "cm"),
+                                 legend.text = element_text(size = 8),
+                                 legend.title = element_text(size = 8),
+                                 plot.tag = element_text(size = 10, face = "bold"))
+
+g_empirical_type
+
+g_modeling_type <- ggplot(data = modeling_bar, aes(x= reorder(country_clean, -total_cases_all), y = total_cases, fill = objectives_scenarios_clean)) +
+  facet_grid(source~., space = "free_y", scales = "free_y") +
+  geom_bar(position = position_stack(), stat = "identity", color = "grey30", lwd = 0.2) +
+  scale_fill_manual(name = "Closure types", values = closure_type) +
+  labs(x = "", y = "Number of cases", tag = "C") +
+  scale_y_continuous(lim = c(0, 8), breaks = seq(0, 8, 4)) +
+  theme_bw() + bar_theme + theme(axis.text.x = element_text(angle = 45, hjust = 1),
+                                 legend.position = "none",
+                                 plot.tag = element_text(size = 10, face = "bold"))
+
+g_modeling_type
+
+
+# Convert to grobs
+gA_grob <- ggplotGrob(worldplot)
+gB_grob <- ggplotGrob(g_empirical_type)
+gC_grob <- ggplotGrob(g_modeling_type)
+
+# Align the bar plots (B and C) so they have matching widths
+max_widths <- grid::unit.pmax(gB_grob$widths, gC_grob$widths)
+gB_grob$widths <- max_widths
+gC_grob$widths <- max_widths
+
+# Combine B and C side by side in one row
+bar_row <- gridExtra::arrangeGrob(gB_grob, gC_grob, ncol = 2)
+
+# Stretch A to same width as B+C by aligning widths
+gA_grob$widths <- grid::unit.pmax(gA_grob$widths, bar_row$widths)
+
+g_total <- gridExtra::grid.arrange(worldplot, bar_row, ncol = 1, heights = c(1.2, 1))
+
+
 # save the world map
-ggsave(worldplot, filename = file.path(plotdir, "Figx_closure_location.png"), width = 7.5, height = 5, units = "in", dpi = 600)
+ggsave(g_total, filename = file.path(plotdir, "Figx_closure_location.png"), width = 7.5, height = 7.5, units = "in", dpi = 600)
 
 
 
